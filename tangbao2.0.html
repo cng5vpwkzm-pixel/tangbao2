@@ -452,7 +452,16 @@ function toggleCloudSync() {
     if (!GIST_CONFIG.token) {
       openTokenModal();
     } else {
-      enableCloudSync();
+      var btn = document.getElementById('cloudSyncBtn');
+      if (btn && btn.classList.contains('offline')) {
+        if (confirm('检测到已有 Token，但云同步已断开。\n\n是否重新输入 Token？\n\n- 取消：尝试使用现有 Token 重新连接\n- 确定：重新输入新的 Token')) {
+          openTokenModal();
+        } else {
+          enableCloudSync();
+        }
+      } else {
+        enableCloudSync();
+      }
     }
   } else {
     disableCloudSync();
