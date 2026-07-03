@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喉结儿菜谱</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Microsoft YaHei','PingFang SC',sans-serif; background:#f5f0e8; color:#333; min-height:100vh; }
+
+/* ===== Header ===== */
+.header { background:linear-gradient(135deg,#e74c3c,#c0392b); color:#fff; padding:14px 20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.2); position:sticky; top:0; z-index:50; }
+.header h1 { font-size:22px; letter-spacing:2px; cursor:pointer; transition:all .2s; }
+.header h1:hover { opacity:.8; text-shadow:0 0 12px rgba(255,255,255,.5); }
+.header h1::after { content:' ✎'; font-size:12px; opacity:0; transition:opacity .2s; }
+.header h1:hover::after { opacity:.6; }
+.header .subtitle { font-size:12px; opacity:.85; margin-top:2px; }
+.cloud-sync-btn { position:absolute; top:10px; right:16px; background:rgba(255,255,255,.2); color:#fff; border:1px solid rgba(255,255,255,.4); padding:5px 12px; border-radius:16px; cursor:pointer; font-size:12px; transition:all .2s; display:flex; align-items:center; gap:4px; }
+.cloud-sync-btn:hover { background:rgba(255,255,255,.35); }
+.cloud-sync-btn.online { background:rgba(39,174,96,.6); border-color:rgba(39,174,96,.8); }
+.cloud-sync-btn.offline { background:rgba(231,76,60,.5); border-color:rgba(231,76,60,.7); }
+.cloud-sync-btn .sync-dot { width:7px; height:7px; border-radius:50%; background:#2ecc71; display:inline-block; }
+.cloud-sync-btn.offline .sync-dot { background:#f39c12; }
+
+/* ===== Screen Container ===== */
+.screen { display:none; max-width:1200px; margin:0 auto; padding:16px; padding-bottom:80px; }
+.screen.active { display:block; }
+
+/* ===== Bottom Tab Bar ===== */
+.bottom-tab-bar { position:fixed; bottom:0; left:0; right:0; background:#fff; display:flex; box-shadow:0 -2px 12px rgba(0,0,0,.1); z-index:60; padding:5px 0; padding-bottom:max(5px, env(safe-area-inset-bottom)); }
+.tab-item { flex:1; text-align:center; padding:6px 4px; cursor:pointer; transition:all .2s; color:#999; font-size:12px; }
+.tab-item .tab-icon { font-size:20px; display:block; margin-bottom:1px; }
+.tab-item .tab-label { font-size:11px; }
+.tab-item.active { color:#e74c3c; }
+.tab-item.active .tab-icon { transform:scale(1.1); }
+
+/* ===== Screen 1: Week View ===== */
+.week-nav { display:flex; justify-content:center; align-items:center; gap:10px; margin:16px 0; flex-wrap:wrap; }
+.week-nav button { background:#e74c3c; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; transition:all .2s; }
+.week-nav button:hover { background:#c0392b; }
+.week-nav .week-label { font-size:16px; font-weight:bold; min-width:200px; text-align:center; color:#2c3e50; cursor:pointer; transition:all .2s; padding:6px 12px; border-radius:8px; }
+.week-nav .week-label:hover { background:#fde8e8; color:#c0392b; }
+.week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-bottom:16px; }
+.day-card { background:#fff; border-radius:10px; padding:10px; min-height:220px; box-shadow:0 1px 4px rgba(0,0,0,.08); border-top:3px solid #ddd; cursor:pointer; transition:all .2s; position:relative; }
+.day-card:hover { box-shadow:0 3px 12px rgba(0,0,0,.12); }
+.day-card.today { border-top-color:#e74c3c; box-shadow:0 2px 8px rgba(231,76,60,.2); }
+.day-card.active { border-top-color:#e67e22; box-shadow:0 2px 12px rgba(230,126,34,.25); background:#fffaf5; }
+.day-card .day-name { font-weight:bold; font-size:14px; margin-bottom:2px; }
+	.day-card .day-date { font-size:11px; color:#888; margin-bottom:8px; }
+.day-card.today .day-name { color:#e74c3c; }
+.day-card.active .day-name { color:#e67e22; }
+.day-recipe { background:#fff3cd; border-radius:6px; padding:6px 8px; margin-bottom:4px; font-size:12px; cursor:pointer; position:relative; border-left:3px solid #ffc107; transition:all .15s; }
+.day-recipe:hover { background:#ffe69c; }
+.day-recipe .recipe-name { font-weight:bold; }
+.day-recipe .recipe-time { color:#666; font-size:11px; }
+.day-recipe .remove-btn { position:absolute; right:4px; top:50%; transform:translateY(-50%); background:#e74c3c; color:#fff; border:none; border-radius:50%; width:20px; height:20px; font-size:12px; cursor:pointer; line-height:20px; text-align:center; opacity:0; transition:opacity .15s; }
+.day-recipe:hover .remove-btn { opacity:1; }
+.day-empty { color:#bbb; font-size:12px; text-align:center; padding:30px 0; }
+.day-empty .empty-icon { font-size:24px; display:block; margin-bottom:4px; }
+.btn-row { display:flex; justify-content:center; gap:12px; margin:16px 0; flex-wrap:wrap; }
+.btn { padding:12px 32px; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:bold; transition:all .2s; }
+.btn-pick { background:#e74c3c; color:#fff; font-size:18px; padding:14px 48px; box-shadow:0 4px 12px rgba(231,76,60,.3); }
+.btn-pick:hover { background:#c0392b; transform:translateY(-2px); box-shadow:0 6px 16px rgba(231,76,60,.4); }
+.btn-clear { background:#95a5a6; color:#fff; }
+.btn-clear:hover { background:#7f8c8d; }
+.btn-back { background:transparent; color:#e74c3c; border:1px solid #e74c3c; padding:8px 20px; border-radius:6px; cursor:pointer; font-size:14px; transition:all .2s; }
+.btn-back:hover { background:#fdf2f2; }
+.active-day-info { text-align:center; margin:8px 0; font-size:14px; color:#e67e22; }
+.active-day-info strong { background:#fff3e0; padding:2px 8px; border-radius:4px; }
+
+/* ===== Screen 2: Category ===== */
+.category-grid { display:flex; justify-content:center; gap:24px; margin:20px 0; flex-wrap:wrap; }
+.cat-card { background:#fff; border-radius:16px; padding:32px 24px; text-align:center; cursor:pointer; width:260px; box-shadow:0 2px 12px rgba(0,0,0,.08); transition:all .3s; position:relative; }
+.cat-card:hover { transform:translateY(-6px); box-shadow:0 8px 28px rgba(0,0,0,.15); }
+.cat-card .cat-icon { font-size:48px; margin-bottom:12px; }
+.cat-card .cat-title { font-size:20px; font-weight:bold; margin-bottom:6px; }
+.cat-card .cat-count { font-size:14px; color:#888; }
+.cat-card .cat-hint { font-size:12px; color:#aaa; margin-top:6px; }
+.cat-card.seasonal { border:2px solid #ffc107; }
+.cat-card.seasonal:hover { background:#fffde7; }
+.cat-card.home { border:2px solid #3498db; }
+.cat-card.home:hover { background:#eaf2fd; }
+.cat-card .cat-add-btn { display:block; margin-top:12px; padding:6px 16px; background:#e74c3c; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:13px; transition:all .2s; width:100%; }
+.cat-card .cat-add-btn:hover { background:#c0392b; }
+
+/* ===== Screen 3: Recipe List ===== */
+.recipe-toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; background:#fff; padding:12px 16px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.search-box { flex:1; min-width:200px; padding:10px 16px; border:2px solid #ddd; border-radius:8px; font-size:14px; outline:none; transition:border .2s; }
+.search-box:focus { border-color:#e74c3c; }
+.recipe-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:12px; }
+.recipe-card { background:#fff; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,.08); transition:all .2s; border-left:4px solid #e74c3c; display:flex; flex-direction:column; }
+.recipe-card.home-card { border-left-color:#3498db; }
+.recipe-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.12); transform:translateY(-1px); }
+.recipe-card .r-name { font-size:17px; font-weight:bold; margin-bottom:6px; color:#2c3e50; }
+.recipe-card .r-meta { display:flex; gap:12px; font-size:12px; color:#888; margin-bottom:8px; flex-wrap:wrap; }
+.recipe-card .r-meta span { background:#f5f5f5; padding:2px 8px; border-radius:4px; }
+.recipe-card .r-prep { font-size:13px; color:#e74c3c; font-weight:bold; margin-bottom:8px; }
+.recipe-card .r-ingredients { font-size:12px; color:#555; margin-bottom:10px; max-height:72px; overflow:hidden; line-height:1.6; background:#fafafa; padding:8px; border-radius:6px; }
+.recipe-card .r-actions { display:flex; gap:6px; margin-top:auto; }
+.recipe-card .r-actions button { flex:1; padding:8px 0; border:none; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold; transition:all .2s; }
+.btn-select { background:#e74c3c; color:#fff; }
+.btn-select:hover { background:#c0392b; }
+.btn-detail { background:#f0f0f0; color:#555; }
+.btn-detail:hover { background:#e0e0e0; }
+.btn-edit-card { background:#3498db; color:#fff; }
+	.btn-edit-card:hover { background:#2980b9; }
+
+	/* Recipe star button */
+	.recipe-card .r-star-btn { position:absolute; top:8px; right:8px; background:transparent; border:none; font-size:20px; cursor:pointer; padding:0; line-height:1; transition:transform .2s; z-index:2; }
+	.recipe-card .r-star-btn:hover { transform:scale(1.3); }
+	.recipe-card.starred { border-left-color:#f39c12; background:#fffef5; }
+	.recipe-card.starred .r-star-btn { color:#f39c12; }
+	.r-star-filter { background:#fff; color:#f39c12; border:2px solid #f39c12; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold; white-space:nowrap; transition:all .2s; }
+	.r-star-filter:hover { background:#fff8e1; }
+	.r-star-filter.active { background:#f39c12; color:#fff; }
+
+	/* Custom category card */
+	.cat-card.custom { border:2px solid #27ae60; }
+	.cat-card.custom:hover { background:#e8f5e9; }
+	.cat-card .cat-delete-btn { position:absolute; top:8px; right:8px; background:transparent; border:none; font-size:16px; cursor:pointer; color:#aaa; padding:2px 6px; border-radius:50%; transition:all .2s; }
+	.cat-card .cat-delete-btn:hover { color:#e74c3c; background:#fde8e8; }
+
+	/* Category management modal */
+	.cat-mgmt-modal { max-width:450px; }
+	.cat-mgmt-list { list-style:none; margin:0; padding:0; }
+	.cat-mgmt-item { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid #eee; gap:8px; }
+	.cat-mgmt-item .cat-mgmt-name { flex:1; font-size:14px; font-weight:bold; }
+	.cat-mgmt-item .cat-mgmt-count { font-size:12px; color:#888; margin-right:8px; }
+	.cat-mgmt-item .cat-mgmt-actions { display:flex; gap:4px; }
+	.cat-mgmt-item button { padding:4px 10px; border:none; border-radius:4px; cursor:pointer; font-size:12px; transition:all .2s; }
+	.cat-mgmt-item .btn-rename { background:#3498db; color:#fff; }
+	.cat-mgmt-item .btn-rename:hover { background:#2980b9; }
+	.cat-mgmt-item .btn-delete-cat { background:#e74c3c; color:#fff; }
+	.cat-mgmt-item .btn-delete-cat:hover { background:#c0392b; }
+	.cat-mgmt-item.fixed-cat .cat-mgmt-actions { display:none; }
+	.cat-mgmt-add { display:flex; gap:8px; margin-top:12px; }
+	.cat-mgmt-add input { flex:1; padding:8px 12px; border:2px solid #ddd; border-radius:6px; font-size:14px; font-family:inherit; outline:none; }
+	.cat-mgmt-add input:focus { border-color:#27ae60; }
+	.cat-mgmt-add button { background:#27ae60; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold; }
+	.cat-mgmt-add button:hover { background:#219a52; }
+
+/* ===== Screen 4: History ===== */
+.history-nav { display:flex; justify-content:center; align-items:center; gap:10px; margin:16px 0; flex-wrap:wrap; }
+.history-nav button { background:#e74c3c; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:14px; transition:all .2s; }
+.history-nav button:hover { background:#c0392b; }
+.history-nav input[type="date"] { padding:8px 12px; border:2px solid #ddd; border-radius:6px; font-size:14px; font-family:inherit; outline:none; }
+.history-nav input[type="date"]:focus { border-color:#e74c3c; }
+.history-date-info { text-align:center; font-size:14px; color:#e67e22; margin-bottom:12px; }
+.history-recipe-list { max-width:650px; margin:0 auto; }
+.history-recipe-item { background:#fff; border-radius:10px; padding:14px 16px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,.08); border-left:4px solid #e74c3c; cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:all .2s; }
+.history-recipe-item:hover { box-shadow:0 3px 12px rgba(0,0,0,.12); }
+.history-recipe-item .h-name { font-weight:bold; font-size:15px; flex:1; }
+.history-recipe-item .h-time { color:#888; font-size:12px; margin-left:12px; white-space:nowrap; }
+.history-recipe-item .h-arrow { color:#ccc; margin-left:8px; }
+.history-empty { text-align:center; color:#bbb; padding:40px 0; font-size:14px; }
+.history-empty .empty-icon { font-size:40px; display:block; margin-bottom:8px; }
+
+/* ===== Modal ===== */
+.modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); z-index:100; justify-content:center; align-items:center; padding:20px; }
+.modal-overlay.active { display:flex; }
+.modal { background:#fff; border-radius:16px; padding:24px; max-width:650px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,.2); }
+.modal h2 { margin-bottom:16px; color:#2c3e50; font-size:20px; padding-bottom:8px; border-bottom:2px solid #f0f0f0; }
+.modal .detail-section { margin-bottom:14px; }
+.modal .detail-section h3 { font-size:14px; color:#e74c3c; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.modal .detail-section pre { white-space:pre-wrap; font-family:'Microsoft YaHei',sans-serif; font-size:13px; line-height:1.7; background:#f8f8f8; padding:12px; border-radius:8px; margin:0; }
+.modal .detail-section img { max-width:100%; max-height:250px; border-radius:8px; display:block; margin-bottom:8px; object-fit:cover; }
+.modal .close-btn { background:#e74c3c; color:#fff; border:none; padding:10px 28px; border-radius:6px; cursor:pointer; font-size:14px; float:right; margin-top:4px; transition:all .2s; }
+.modal .close-btn:hover { background:#c0392b; }
+
+/* ===== Form Modal ===== */
+.form-modal { max-width:550px; }
+.form-modal .form-group { margin-bottom:14px; }
+.form-modal .form-group label { display:block; font-size:13px; font-weight:bold; color:#555; margin-bottom:4px; }
+.form-modal .form-group input,
+.form-modal .form-group select,
+.form-modal .form-group textarea { width:100%; padding:10px 12px; border:2px solid #ddd; border-radius:8px; font-size:14px; font-family:inherit; transition:border .2s; outline:none; }
+.form-modal .form-group input:focus,
+.form-modal .form-group select:focus,
+.form-modal .form-group textarea:focus { border-color:#e74c3c; }
+.form-modal .form-actions { display:flex; gap:10px; margin-top:16px; justify-content:flex-end; flex-wrap:wrap; }
+.form-modal .btn-save { background:#e74c3c; color:#fff; border:none; padding:10px 28px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold; }
+.form-modal .btn-save:hover { background:#c0392b; }
+.form-modal .btn-cancel { background:#f0f0f0; color:#555; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; }
+.form-modal .btn-delete { background:#c0392b; color:#fff; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-size:14px; margin-right:auto; }
+.form-modal .btn-delete:hover { background:#a93226; }
+.image-upload-area { border:2px dashed #ddd; border-radius:8px; padding:16px; text-align:center; cursor:pointer; transition:border .2s; position:relative; }
+.image-upload-area:hover { border-color:#e74c3c; }
+.image-upload-area input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.image-preview img { max-width:100%; max-height:200px; border-radius:8px; object-fit:cover; }
+.upload-placeholder { color:#aaa; font-size:14px; }
+.btn-remove-image { margin-top:8px; background:#e74c3c; color:#fff; border:none; padding:6px 16px; border-radius:4px; cursor:pointer; font-size:12px; }
+
+/* ===== Calendar Modal ===== */
+.calendar-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); z-index:100; justify-content:center; align-items:center; padding:20px; }
+.calendar-overlay.active { display:flex; }
+.calendar-popup { background:#fff; border-radius:16px; padding:24px; max-width:480px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,.2); }
+.calendar-popup h2 { text-align:center; margin-bottom:16px; color:#2c3e50; font-size:18px; }
+.calendar-nav { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.calendar-nav button { background:transparent; border:none; font-size:20px; cursor:pointer; padding:4px 12px; color:#e74c3c; }
+.calendar-nav button:hover { color:#c0392b; }
+.calendar-nav .cal-month-label { font-size:16px; font-weight:bold; color:#2c3e50; }
+.calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center; }
+.calendar-grid .cal-day-header { font-size:12px; color:#888; padding:6px 0; font-weight:bold; }
+.calendar-grid .cal-day { padding:10px 0; border-radius:8px; cursor:pointer; font-size:14px; transition:all .2s; position:relative; }
+.calendar-grid .cal-day:hover { background:#fde8e8; }
+.calendar-grid .cal-day.today { background:#e74c3c; color:#fff; font-weight:bold; }
+.calendar-grid .cal-day.in-week { background:#ffeaa7; }
+.calendar-grid .cal-day.in-week.today { background:#e74c3c; color:#fff; }
+.calendar-grid .cal-day.other-month { color:#ccc; cursor:default; }
+.calendar-grid .cal-day.other-month:hover { background:transparent; }
+	.calendar-row { display:contents; }
+	.calendar-actions { text-align:center; margin-top:16px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+	.calendar-actions button { background:#e74c3c; color:#fff; border:none; padding:8px 24px; border-radius:6px; cursor:pointer; font-size:14px; margin:0; transition:all .2s; }
+	.calendar-actions button:hover { background:#c0392b; }
+	.calendar-actions button.btn-cancel { background:#95a5a6; }
+	.calendar-actions button.btn-cancel:hover { background:#7f8c8d; }
+
+	/* ===== Toast ===== */
+.toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#27ae60; color:#fff; padding:12px 24px; border-radius:8px; font-size:14px; z-index:200; display:none; animation:toastIn .3s; box-shadow:0 4px 12px rgba(0,0,0,.2); }
+.toast.show { display:block; }
+.toast.warning { background:#e67e22; }
+@keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(10px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
+
+/* ===== Responsive ===== */
+@media (max-width:900px) { .week-grid { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:600px) {
+  .week-grid { grid-template-columns:repeat(2,1fr); } .recipe-list { grid-template-columns:1fr; } .cat-card { width:100%; }
+  .bottom-tab-bar { padding:4px 0; } .tab-item .tab-icon { font-size:18px; } .tab-item .tab-label { font-size:10px; }
+  .form-modal { margin:10px; } .recipe-card .r-actions button { font-size:11px; }
+}
+</style>
+<!-- 云同步：使用 GitHub Gist 作为免费数据存储，无需第三方 SDK -->
+</head>
+<body>
+
+<div class="header">
+  <h1>🍳 喉结儿菜谱</h1>
+  <div class="subtitle" id="headerTitle">今日食谱</div>
+  <button class="cloud-sync-btn offline" id="cloudSyncBtn" onclick="toggleCloudSync()" title="点击启用云端同步">
+    <span class="sync-dot"></span> <span id="cloudSyncLabel">未启用云同步</span>
+  </button>
+</div>
+
+<!-- ===== Screen 1: Weekly Menu ===== -->
+<div class="screen active" id="screen1">
+  <div class="week-nav">
+    <button onclick="prevWeek()">◀ 上周</button>
+    <span class="week-label" id="weekLabel" onclick="openCalendar()" title="点击打开日历选择日期"></span>
+    <button onclick="nextWeek()">▶ 下周</button>
+	    <button onclick="goCurrentWeek()" style="background:#27ae60;">📅 本周</button>
+	  </div>
+  <div class="active-day-info" id="activeDayInfo">
+    📌 当前选中：<strong id="activeDayText"></strong>（点击日期卡片可切换）
+  </div>
+  <div class="week-grid" id="weekGrid"></div>
+  <div class="btn-row">
+    <button class="btn btn-pick" onclick="goPick()">🎯 去挑选菜品</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-clear" onclick="clearAll()">🗑 清空本周食谱</button>
+  </div>
+</div>
+
+<!-- ===== Screen 2: Category Selection ===== -->
+<div class="screen" id="screen2">
+  <div style="margin-bottom:16px;">
+    <button class="btn-back" onclick="switchTab('screen1',document.querySelector('.tab-item[data-tab=screen1]'))">← 返回食谱</button>
+  </div>
+  <div class="active-day-info" id="activeDayInfo2"></div>
+  <h2 style="text-align:center;margin:20px 0;">请选择菜品类型</h2>
+	  <div class="category-grid" id="categoryGrid">
+	    <!-- Categories rendered dynamically by renderCategoryCards() -->
+	  </div>
+	  <div class="btn-row" style="margin-top:16px;">
+	    <button class="btn" style="background:#27ae60;color:#fff;padding:10px 24px;font-size:14px;" onclick="openCategoryManagement()">➕ 管理分类</button>
+	  </div>
+</div>
+
+<!-- ===== Screen 3: Recipe List ===== -->
+<div class="screen" id="screen3">
+  <div class="recipe-toolbar">
+    <button class="btn-back" onclick="switchTab('screen2',document.querySelector('.tab-item[data-tab=screen2]'))">← 返回</button>
+    <input type="text" class="search-box" id="searchBox" placeholder="🔍 搜索菜品名称..." oninput="filterRecipes()">
+	    <button class="r-star-filter" id="starFilterBtn" onclick="toggleStarFilter()" title="只看星标菜品">⭐ 星标</button>
+	    <span style="font-size:13px;color:#888;white-space:nowrap;" id="filterCount"></span>
+    <button class="btn" style="background:#27ae60;color:#fff;padding:8px 16px;font-size:13px;" onclick="openRecipeForm(null,currentCategory)">➕ 新增</button>
+  </div>
+  <div class="active-day-info" id="activeDayInfo3"></div>
+  <div class="recipe-list" id="recipeList"></div>
+</div>
+
+<!-- ===== Screen 4: History ===== -->
+<div class="screen" id="screen4">
+  <div class="history-nav">
+    <button onclick="prevHistoryDay()">◀ 前一天</button>
+    <input type="date" id="historyDatePicker" onchange="onHistoryDateChange()">
+    <button onclick="nextHistoryDay()">后一天 ▶</button>
+    <button onclick="goHistoryToday()" style="background:#27ae60;">📅 今天</button>
+  </div>
+  <div class="history-date-info" id="historyDateInfo"></div>
+	  <div class="history-recipe-list" id="historyRecipeList"></div>
+</div>
+
+<!-- ===== Detail Modal ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- ===== Form Modal (Add/Edit) ===== -->
+<div class="modal-overlay" id="formModalOverlay">
+  <div class="modal form-modal" id="formModalContent"></div>
+</div>
+
+<!-- ===== Calendar Modal ===== -->
+<div class="calendar-overlay" id="calendarOverlay">
+  <div class="calendar-popup" id="calendarPopup"></div>
+</div>
+
+<!-- ===== Category Management Modal ===== -->
+	<div class="modal-overlay" id="catMgmtOverlay">
+	  <div class="modal cat-mgmt-modal" id="catMgmtContent"></div>
+	</div>
+
+	<!-- ===== Toast ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== Bottom Tab Bar ===== -->
+<div class="bottom-tab-bar">
+  <div class="tab-item active" onclick="switchTab('screen1',this)" data-tab="screen1">
+    <span class="tab-icon">📅</span>
+    <span class="tab-label">今日食谱</span>
+  </div>
+  <div class="tab-item" onclick="switchTab('screen2',this)" data-tab="screen2">
+    <span class="tab-icon">🍳</span>
+    <span class="tab-label">菜品库</span>
+  </div>
+  <div class="tab-item" onclick="switchTab('screen4',this)" data-tab="screen4">
+    <span class="tab-icon">📜</span>
+    <span class="tab-label">历史查询</span>
+  </div>
+</div>
+
+<script>
+// ==================== GitHub Gist 配置 ====================
+// 👇 请在此处粘贴你的 GitHub 配置（详见下方说明）
+var GIST_CONFIG = {
+  token: "",                   // 从 localStorage 读取，首次使用时通过界面输入
+  gistId: ""                   // 留空，首次同步会自动创建
+};
+// ==================== 数据命名空间 ====================
+// 修改此值可创建独立的数据空间，不同文件互不干扰
+var DATA_NAMESPACE = 'tangbao';
+
+function lsGet(key) { return localStorage.getItem(DATA_NAMESPACE + '_' + key); }
+function lsSet(key, value) { localStorage.setItem(DATA_NAMESPACE + '_' + key, value); }
+function lsRemove(key) { localStorage.removeItem(DATA_NAMESPACE + '_' + key); }
+var GIST_FILENAME = DATA_NAMESPACE + '_recipes_data.json';
+
+function migrateFromOldNamespace() {
+  var oldKeys = ['recipes_v1', 'starred_recipes_v1', 'categories_v1', 'menu_v2', 'app_title', 'github_token', 'gist_id', 'cloud_sync_enabled'];
+  var migrated = false;
+  for (var i = 0; i < oldKeys.length; i++) {
+    var oldKey = 'houjie_' + oldKeys[i];
+    var value = localStorage.getItem(oldKey);
+    if (value) {
+      var newKey = DATA_NAMESPACE + '_' + oldKeys[i];
+      if (!localStorage.getItem(newKey)) {
+        localStorage.setItem(newKey, value);
+        migrated = true;
+        console.log('Migrated:', oldKey, '->', newKey);
+      }
+    }
+  }
+  if (migrated) {
+    showToast('📥 已从旧版本迁移数据', false);
+  }
+}
+
+migrateFromOldNamespace();
+
+
+// ==================== CLOUD SYNC（基于 GitHub Gist） ====================
+var cloudSyncEnabled = false;
+var cloudInitialized = false;
+var cloudPollTimer = null;
+var cloudLastUpdated = '';
+var cloudLocalUpdating = false;
+
+function initCloud() {
+  // 从 localStorage 读取 token
+  var savedToken = lsGet('github_token');
+  if (savedToken) {
+    GIST_CONFIG.token = savedToken;
+  }
+  // 从 localStorage 恢复 gistId
+  var savedId = lsGet('gist_id');
+  if (savedId) GIST_CONFIG.gistId = savedId;
+  cloudInitialized = true;
+  updateSyncButtonUI();
+  return !!GIST_CONFIG.token;
+}
+
+function toggleCloudSync() {
+  if (!cloudSyncEnabled) {
+    if (!GIST_CONFIG.token) {
+      var token = prompt('请输入 GitHub Token（仅需 gist 权限）：');
+      if (!token || !token.trim()) {
+        showToast('⚠️ 未输入 Token，云同步已取消', true);
+        return;
+      }
+      GIST_CONFIG.token = token.trim();
+      lsSet('github_token', GIST_CONFIG.token);
+    }
+    enableCloudSync();
+  } else {
+    disableCloudSync();
+  }
+}
+
+function enableCloudSync() {
+  cloudSyncEnabled = true;
+  lsSet('cloud_sync_enabled', '1');
+  updateSyncButtonUI();
+  showToast('☁️ 正在连接 GitHub...');
+  
+  if (GIST_CONFIG.gistId) {
+    // 已有 Gist，从云端拉取数据
+    loadFromCloud(function(success) {
+      if (success) {
+        showToast('☁️ 云同步已启用，数据每3秒自动同步');
+        startCloudPolling();
+      } else {
+        showToast('⚠️ 云端连接失败，请检查 Token 和网络', true);
+        cloudSyncEnabled = false;
+        lsRemove('cloud_sync_enabled');
+        updateSyncButtonUI();
+      }
+    });
+  } else {
+    // 首次使用，创建 Gist 并推送本地数据
+    createCloudGist(function(success) {
+      if (success) {
+        showToast('☁️ 云同步已启用，数据每3秒自动同步');
+        startCloudPolling();
+      } else {
+        showToast('⚠️ 创建云端存储失败，请检查 Token 和网络', true);
+        cloudSyncEnabled = false;
+        lsRemove('cloud_sync_enabled');
+        updateSyncButtonUI();
+      }
+    });
+  }
+}
+
+function disableCloudSync() {
+  cloudSyncEnabled = false;
+  lsRemove('cloud_sync_enabled');
+  updateSyncButtonUI();
+  stopCloudPolling();
+  showToast('📦 已切换为本地存储模式');
+}
+
+function updateSyncButtonUI() {
+  var btn = document.getElementById('cloudSyncBtn');
+  var label = document.getElementById('cloudSyncLabel');
+  if (!btn || !label) return;
+  if (cloudSyncEnabled) {
+    btn.className = 'cloud-sync-btn online';
+    label.textContent = '云同步已启用';
+    btn.title = '点击关闭云端同步';
+  } else if (GIST_CONFIG.token) {
+    btn.className = 'cloud-sync-btn offline';
+    label.textContent = '云同步已断开';
+    btn.title = '点击启用云端同步';
+  } else {
+    btn.className = 'cloud-sync-btn offline';
+    label.textContent = '云同步未启用';
+    btn.title = '点击启用多人协作云同步';
+  }
+}
+
+// GitHub API 请求封装
+function githubApi(method, path, body) {
+  var opts = {
+    method: method,
+    headers: {
+      'Authorization': 'token ' + GIST_CONFIG.token,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  };
+  if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  return fetch('https://api.github.com' + path, opts).then(function(r) {
+    if (!r.ok) throw new Error('GitHub API error: ' + r.status);
+    return r.json();
+  });
+}
+
+// 创建 Gist（首次使用）
+function createCloudGist(callback) {
+  var data = {
+    description: '喉结儿菜谱 - 云端数据',
+    public: false,
+    files: {
+      GIST_FILENAME: {
+        content: JSON.stringify({
+          recipes: RECIPES.categories,
+          starred: getStarredRecipeIds(),
+          categories: getCategories(),
+          title: getCurrentAppTitle(),
+          version: 1
+        })
+      }
+    }
+  };
+  githubApi('POST', '/gists', data).then(function(gist) {
+    GIST_CONFIG.gistId = gist.id;
+    lsSet('gist_id', gist.id);
+    cloudLastUpdated = gist.updated_at;
+    if (callback) callback(true);
+  }).catch(function(err) {
+    console.error('创建 Gist 失败:', err);
+    if (callback) callback(false);
+  });
+}
+
+// 从云端加载数据
+function loadFromCloud(callback) {
+  githubApi('GET', '/gists/' + GIST_CONFIG.gistId).then(function(gist) {
+    if (gist.updated_at === cloudLastUpdated) {
+      if (callback) callback(true);
+      return;
+    }
+    cloudLastUpdated = gist.updated_at;
+    var file = gist.files && gist.files[GIST_FILENAME];
+    if (!file || !file.content) {
+      if (callback) callback(true);
+      return;
+    }
+    applyCloudData(file.content);
+    if (callback) callback(true);
+  }).catch(function(err) {
+    console.error('从云端读取失败:', err);
+    if (callback) callback(false);
+  });
+}
+
+// 应用云端数据到本地
+function applyCloudData(contentStr) {
+  cloudLocalUpdating = true;
+  try {
+    var data = JSON.parse(contentStr);
+    if (data.recipes) {
+      RECIPES.categories = data.recipes;
+      saveRecipesToStorageLocal();
+    }
+    if (data.starred) {
+      lsSet('starred_recipes_v1', JSON.stringify(data.starred));
+    }
+    if (data.categories) {
+      lsSet('categories_v1', JSON.stringify(data.categories));
+    }
+    if (data.title) {
+      lsSet('app_title', data.title);
+      var h1 = document.querySelector('.header h1');
+      if (h1) { h1.textContent = '🍳 ' + data.title; document.title = data.title; }
+    }
+    syncCategoryDisplay();
+    if (currentCategory) {
+      currentRecipes = getRecipesByCategory(currentCategory);
+      renderRecipeList(currentRecipes);
+    }
+    renderWeek();
+  } catch(e) {
+    console.error('应用云端数据失败:', e);
+  }
+  cloudLocalUpdating = false;
+}
+
+// 推送数据到云端
+function pushToCloud() {
+  if (!cloudSyncEnabled || !cloudInitialized || cloudLocalUpdating || !GIST_CONFIG.gistId) return;
+  var data = {
+    recipes: RECIPES.categories,
+    starred: getStarredRecipeIds(),
+    categories: getCategories(),
+    title: getCurrentAppTitle(),
+    version: Date.now()
+  };
+  githubApi('PATCH', '/gists/' + GIST_CONFIG.gistId, {
+    files: {
+      GIST_FILENAME: { content: JSON.stringify(data) }
+    }
+  }).then(function(gist) {
+    cloudLastUpdated = gist.updated_at;
+  }).catch(function(err) {
+    console.error('推送数据到云端失败:', err);
+  });
+}
+
+// 仅保存到本地（不触发云端同步，避免循环）
+function saveRecipesToStorageLocal() {
+  try {
+    var data = {categories: RECIPES.categories};
+    lsSet('recipes_v1', JSON.stringify(data));
+  } catch(e) {
+    showToast('⚠️ 存储空间不足，请清理旧数据', true);
+  }
+}
+
+// 云端轮询（每3秒检查一次）
+function startCloudPolling() {
+  stopCloudPolling();
+  cloudPollTimer = setInterval(function() {
+    if (!cloudSyncEnabled || !GIST_CONFIG.gistId || cloudLocalUpdating) return;
+    githubApi('GET', '/gists/' + GIST_CONFIG.gistId).then(function(gist) {
+      if (gist.updated_at === cloudLastUpdated) return;
+      cloudLastUpdated = gist.updated_at;
+      var file = gist.files && gist.files[GIST_FILENAME];
+      if (file && file.content) {
+        applyCloudData(file.content);
+      }
+    }).catch(function(err) {
+      // 静默忽略轮询错误
+    });
+  }, 3000);
+}
+
+function stopCloudPolling() {
+  if (cloudPollTimer) {
+    clearInterval(cloudPollTimer);
+    cloudPollTimer = null;
+  }
+}
+
+// ===== DATA =====
+var RECIPES = {categories: {seasonal:[], home:[]},
+  getAll: function() { var all = []; var cats = getCategories(); for (var ci = 0; ci < cats.length; ci++) { all = all.concat(this.categories[cats[ci]] || []); } return all; },
+  getById: function(id) { return this.getAll().find(function(r) { return r.id === id; }); },
+  removeById: function(id) {
+    var cats = getCategories(); for (var ci = 0; ci < cats.length; ci++) { if (this.categories[cats[ci]]) { this.categories[cats[ci]] = this.categories[cats[ci]].filter(function(r) { return r.id !== id; }); } }
+  }
+};
+
+function generateRecipeId() {
+  return 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+}
+
+function saveRecipesToStorage() {
+  try {
+    var data = {categories: RECIPES.categories};
+    lsSet('recipes_v1', JSON.stringify(data));
+    pushToCloud();
+  } catch(e) {
+    showToast('⚠️ 存储空间不足，请清理旧数据', true);
+  }
+}
+
+function migrateData(rawData) {
+  var seasonal = (rawData.seasonal || []).map(function(r) {
+    r.id = generateRecipeId();
+    r.image = r.image || '';
+    r.isCustom = false;
+    r.createdAt = Date.now().toString();
+    return r;
+  });
+  var home = (rawData.home || []).map(function(r) {
+    r.id = generateRecipeId();
+    r.image = r.image || '';
+    r.isCustom = false;
+    r.createdAt = Date.now().toString();
+    return r;
+  });
+  var data = {categories: {seasonal:seasonal, home:home}};
+  lsSet('recipes_v1', JSON.stringify(data));
+  return data;
+}
+
+function loadData() {
+  var saved = lsGet('recipes_v1');
+  var data;
+  if (saved) {
+    data = JSON.parse(saved);
+  } else {
+    var raw = {"home":[{"category":"home","month":"全年","stepTime":"腌肉15分钟、炒番茄3分钟、煮肉片2分钟","name":"番茄滑肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.肉切薄片加料酒半勺、盐少许、蛋清1个、淀粉2勺抓匀腌制15分钟；2.番茄切小块；3.中火热油下姜蒜末爆香（火候：中火）；4.下番茄块大火炒软出汁，加白糖半小勺提鲜（火候：大火）；5.加半碗水大火煮沸；6.将肉片逐片滑入汤中，小火煮2分钟至肉片变白（火候：小火）；7.加生抽1勺、盐半小勺调味；8.水淀粉勾薄芡，撒葱花出锅","ingredients":"猪里脊肉200g、番茄2个、鸡蛋1个、淀粉3勺、葱姜蒜适量、盐1小勺、生抽1勺、料酒1勺、白糖半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、腌虾10分钟、煎土豆5分钟、滑牛肉2分钟、煎虾3分钟、炒底料2分钟、汇合翻炒2分钟","name":"干锅牛肉虾","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉切薄片加料酒半勺、生抽半勺、淀粉1勺、盐少许腌15分钟；2.虾开背去虾线加料酒半勺、盐少许腌10分钟；3.土豆切条，洋葱青椒切块；4.中火热油（油稍多）下土豆条中火煎至金黄盛出（火候：中火）；5.留底油大火下牛肉片滑炒至变色盛出（火候：大火）；6.大火下虾煎至变红盛出（火候：大火）；7.小火下干辣椒花椒豆瓣酱炒出红油（火候：小火）；8.下洋葱青椒大火翻炒1分钟；9.所有食材倒回，加生抽1勺、孜然粉1小勺、盐半小勺大火翻炒1分钟出锅","ingredients":"牛肉150g、虾150g、土豆1个、洋葱半个、青椒1个、干辣椒5个、花椒1小勺、豆瓣酱1勺、孜然粉1小勺、生抽1勺、料酒1勺、盐半小勺、淀粉1勺、食用油3勺、炒锅"},{"category":"home","month":"全年","stepTime":"切块5分钟、煎制8分钟、熬糖浆3分钟、裹糖收汁5分钟","name":"潮汕糕烧番薯芋","type":"家常菜","prepTime":"无","steps":"1.红薯芋头去皮切滚刀块；2.中火热油（油稍多）下红薯芋头块中火煎至表面金黄微焦（火候：中火），约8分钟；3.倒出多余的油，留底油；4.锅中加白糖和少量水（约50ml），小火熬糖浆至冒大泡变稠（火候：小火）；5.倒回红薯芋头，小火翻拌使每块裹上糖浆（火候：小火）；6.继续小火熬至糖浆收干成拔丝状（约5分钟）；7.撒白芝麻翻拌出锅","ingredients":"红薯200g、芋头200g、白糖100g、猪油2勺、白芝麻少许、炒锅"},{"category":"home","month":"全年","stepTime":"泡发30分钟、浸泡20分钟、焯水5分钟、炖煮60分钟","name":"羊肚菌山药排骨汤","type":"家常菜","prepTime":"泡发30分钟","steps":"1.羊肚菌温水泡发30分钟洗净泥沙；2.排骨冷水浸泡20分钟去血水；3.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）；4.山药去皮切滚刀块（戴手套）；5.砂锅大火烧开水（火候：大火）；6.下排骨姜片大火煮沸转小火炖40分钟（火候：小火）；7.下羊肚菌山药继续小火炖20分钟；8.加盐1.5小勺调味，撒葱花出锅","ingredients":"羊肚菌10个、山药200g、排骨300g、姜4片、葱1根、料酒1勺、盐1.5小勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌鸡腿20分钟、煎制6分钟、焖制5分钟","name":"黑松露口蘑鸡腿","type":"家常菜","prepTime":"腌制20分钟","steps":"1.鸡腿去骨用刀背拍松，加盐半小勺、黑胡椒少许、生抽1勺腌20分钟；2.口蘑切厚片，大蒜切片；3.中火融化黄油（火候：中火）；4.鸡皮朝下放入中火煎至金黄翻面（火候：中火），每面约3分钟；5.下蒜片和口蘑片一起煎香；6.加黑松露酱1勺翻拌均匀；7.盖上锅盖小火焖5分钟至鸡腿熟透（火候：小火）；8.出锅切块装盘","ingredients":"鸡腿2个、黑松露酱1勺、口蘑150g、黄油20g、大蒜3瓣、黑胡椒少许、盐1小勺、生抽1勺、平底锅"},{"category":"home","month":"全年","stepTime":"备菜3分钟、爆蒜10秒、翻炒1分钟","name":"清炒油柑菜","type":"家常菜","prepTime":"无","steps":"1.油柑菜洗净切段，沥干水分；2.蒜切末；3.大火热油至冒烟（火候：大火）；4.下蒜末大火爆香10秒；5.立即下油柑菜大火快速翻炒（火候：大火）；6.菜变软后加盐1小勺翻炒均匀；7.全程大火约1分钟出锅","ingredients":"油柑菜300g、大蒜3瓣、盐1小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"烤紫菜2分钟、拌匀3分钟、煎制6分钟","name":"紫菜虾滑烙","type":"家常菜","prepTime":"无","steps":"1.紫菜放平底锅小火烤至变绿变脆，捏碎（火候：小火）；2.虾滑加鸡蛋、淀粉2勺、磷虾、葱段、盐半小勺搅匀；3.平底锅刷油中火加热（火候：中火）；4.倒入混合糊摊平呈圆形；5.中火煎至底部金黄翻面（火候：中火），每面约2-3分钟；6.煎好后切块装盘","ingredients":"紫菜1片、虾滑200g、鸡蛋2个、淀粉2勺、磷虾20g、葱段适量、盐半小勺、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"腌制30分钟、煎制8分钟","name":"香煎沙茶猪排","type":"家常菜","prepTime":"腌制30分钟","steps":"1.猪排用刀背拍松；2.加沙茶酱1.5勺、蒜末1勺、生抽1勺、白糖半小勺、淀粉1勺抓匀腌制30分钟；3.平底锅中火热油（火候：中火）；4.放入猪排中火煎至一面金黄翻面（火候：中火），每面约3分钟；5.煎至两面金黄后转小火盖盖焖2分钟确保熟透（火候：小火）；6.开盖大火收干表面汁水30秒出锅（火候：大火）","ingredients":"猪排2块、沙茶酱1.5勺、蒜末1勺、淀粉1勺、生抽1勺、白糖半小勺、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"备菜5分钟、炒蛋黄3分钟、煮制3分钟","name":"蟹黄豆腐煲","type":"家常菜","prepTime":"无","steps":"1.豆腐切小块；2.咸蛋黄蒸熟压碎成泥；3.虾仁加盐少许、淀粉半勺腌5分钟；4.中火热油下咸蛋黄泥小火炒至起沙冒泡（火候：小火）；5.加半碗水大火煮沸（火候：大火）；6.下豆腐块和虾仁轻轻推匀；7.小火煮3分钟（火候：小火）；8.加盐半小勺调味，水淀粉勾薄芡；9.撒葱花出锅","ingredients":"内酯豆腐1盒、咸蛋黄3个、虾仁100g、葱花适量、淀粉1勺、盐半小勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、煎制8分钟","name":"蒜香口蘑鸡","type":"家常菜","prepTime":"腌制15分钟","steps":"1.鸡腿肉切块加盐半小勺、生抽1勺、黑胡椒少许、淀粉1勺腌15分钟；2.口蘑切十字花刀，蒜切厚片；3.平底锅中火热油（火候：中火）；4.鸡块皮朝下中火煎至金黄（火候：中火），约3分钟；5.翻面加黄油蒜片口蘑；6.继续中火煎5分钟至口蘑出汁鸡肉熟透；7.尝味补盐后出锅","ingredients":"鸡腿肉200g、口蘑150g、大蒜5瓣、黄油15g、黑胡椒少许、盐1小勺、生抽1勺、淀粉1勺、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"烫白贝1分钟、酿虾滑10分钟、蒸制8分钟","name":"白贝酿虾滑","type":"家常菜","prepTime":"无","steps":"1.白贝刷洗干净，沸水大火烫至开口立即捞出（火候：大火），约30秒；2.虾滑加生抽半勺、淀粉1勺、葱花搅匀；3.将虾滑酿入每个开口的白贝中；4.蒸锅大火烧开水（火候：大火）；5.摆盘放姜片，大火蒸8分钟（火候：大火）；6.出锅淋生抽半勺、撒葱花、浇热油爆香","ingredients":"白贝15个、虾滑200g、姜2片、料酒1勺、生抽1勺、葱花适量、淀粉1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"腌鱼15分钟、煎制4分钟、爆香翻炒1分钟","name":"沙姜脆肉鲩","type":"家常菜","prepTime":"腌制15分钟","steps":"1.鱼片加盐少许、料酒半勺、淀粉1勺腌15分钟；2.沙姜去皮切碎末，香菜切段；3.平底锅中火热油（火候：中火）；4.鱼片平铺中火煎至一面金黄翻面（火候：中火），每面约2分钟；5.盛出鱼片；6.锅中补少许油，大火下沙姜末爆香（火候：大火）；7.倒回鱼片，加生抽1勺、白糖半小勺、盐少许大火快速翻炒；8.撒香菜段出锅","ingredients":"脆肉鲩鱼片300g、沙姜1块、香菜适量、生抽1勺、白糖半小勺、淀粉1勺、盐半小勺、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"焯荷兰豆1分钟、煸腊肠3分钟、翻炒2分钟","name":"腊肠炒荷兰豆","type":"家常菜","prepTime":"无","steps":"1.荷兰豆去筋洗净；2.腊肠斜切片；3.沸水大火焯荷兰豆30秒捞出过凉水（火候：大火）；4.中火热油下腊肠片小火煸炒出油至微卷（火候：小火）；5.下蒜末爆香后转大火（火候：大火）；6.下荷兰豆大火翻炒1分钟；7.加盐半小勺调味出锅","ingredients":"荷兰豆200g、腊肠1根、大蒜2瓣、盐半小勺、食用油1勺、炒锅"},{"category":"home","month":"全年","stepTime":"浸泡15分钟、焯水5分钟、炖煮20分钟、收汁1分钟","name":"荔枝焖鸡","type":"家常菜","prepTime":"浸泡15分钟","steps":"1.鸡切块冷水浸泡15分钟去血水；2.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）；3.荔枝去壳去核取肉；4.中火热油下姜片爆香（火候：中火）；5.下鸡块大火翻炒至表面微焦（火候：大火）；6.加料酒半勺、生抽2勺、白糖1小勺炒匀；7.加开水没过鸡块大火煮沸；8.转小火炖15分钟（火候：小火）；9.下荔枝肉继续小火焖5分钟；10.加盐1小勺调味，大火收汁1分钟撒葱花","ingredients":"鸡半只、荔枝15颗、姜4片、葱1根、料酒1勺、生抽2勺、盐1小勺、白糖1小勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"煮牛肉30分钟、放凉15分钟、拌制2分钟","name":"黄瓜香菜拌牛肉","type":"家常菜","prepTime":"煮牛肉30分钟","steps":"1.牛肉整块冷水下锅，加姜片料酒，大火煮沸撇浮沫转小火煮30分钟至熟（火候：大火→小火）；2.捞出放凉切薄片；3.黄瓜拍碎切段；4.蒜切末，小米辣切圈，香菜切段；5.调酱汁：生抽1.5勺、醋1勺、香油1勺、盐半小勺、白糖半小勺、蒜末小米辣搅匀；6.牛肉片+黄瓜+酱汁拌匀；7.撒香菜段即可","ingredients":"牛肉200g、黄瓜1根、香菜适量、大蒜3瓣、小米辣2个、生抽1.5勺、醋1勺、香油1勺、盐半小勺、白糖半小勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌鱼10分钟、泡粉丝20分钟、炒蒜末3分钟、焖煮10分钟","name":"鲈鱼鲜虾煲","type":"家常菜","prepTime":"泡粉丝20分钟","steps":"1.鲈鱼处理干净切段，加料酒半勺、盐少许腌10分钟；2.虾开背去虾线；3.粉丝温水泡软20分钟；4.中火热油下蒜末小火炒至金黄（火候：小火）；5.砂锅底铺粉丝，摆上鱼段和虾；6.浇上炒好的蒜末和生抽1.5勺、蚝油1勺；7.加少量水大火煮沸（火候：大火）；8.转小火焖10分钟（火候：小火）；9.撒葱花姜丝，浇热油爆香出锅","ingredients":"鲈鱼1条、鲜虾200g、粉丝1把、蒜末1勺、生抽1.5勺、蚝油1勺、葱姜适量、盐半小勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"浸泡20分钟、焯水5分钟、炖煮60分钟","name":"番茄玉米排骨汤","type":"家常菜","prepTime":"浸泡20分钟","steps":"1.排骨冷水浸泡20分钟去血水；2.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）；3.番茄切块，玉米切段，胡萝卜切滚刀块；4.砂锅大火烧开水（火候：大火）；5.下排骨姜片大火煮沸转小火炖30分钟（火候：小火）；6.下玉米胡萝卜继续小火炖20分钟；7.下番茄小火炖10分钟；8.加盐1.5小勺调味出锅","ingredients":"排骨300g、番茄2个、玉米1根、胡萝卜1根、姜4片、盐1.5小勺、料酒1勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌肉5分钟、炒肉沫3分钟、煎蛋3分钟","name":"肉沫抱蛋","type":"家常菜","prepTime":"腌制5分钟","steps":"1.肉沫加料酒1勺、生抽1勺、淀粉1勺、盐少许搅匀腌5分钟；2.鸡蛋打散加盐少许搅匀；3.中火热油下肉沫中火炒散至变色（火候：中火）；4.将肉沫推到锅边，锅中补少许油；5.倒入蛋液转小火待底部凝固（火候：小火）；6.用铲子轻轻推动让未凝固蛋液流到底部；7.蛋液基本凝固后翻面小火煎30秒；8.整块出锅撒葱花","ingredients":"猪肉沫150g、鸡蛋3个、葱花适量、生抽1勺、盐半小勺、淀粉1勺、料酒1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"焯水5分钟、煸炒5分钟、炖煮40分钟、收汁3分钟","name":"可乐卤肉饭","type":"家常菜","prepTime":"无","steps":"1.五花肉切小块，冷水下锅大火焯水捞出（火候：大火）；2.鸡蛋煮熟剥壳划几刀；3.中火热油下五花肉块中火煸炒至表面微焦出油（火候：中火）；4.下葱姜爆香；5.加料酒1勺、生抽2勺、老抽1勺翻炒上色；6.倒入可乐和开水没过肉，大火煮沸；7.下鸡蛋转小火炖40分钟至肉软烂（火候：小火）；8.大火收汁至汤汁浓稠（火候：大火），约3分钟","ingredients":"五花肉300g、可乐200ml、鸡蛋4个、葱姜适量、生抽2勺、老抽1勺、料酒1勺、食用油1勺、炒锅/砂锅"},{"category":"home","month":"全年","stepTime":"处理10分钟、焯水1分钟、爆葱1分钟、翻炒1分钟","name":"葱烧小鱿鱼","type":"家常菜","prepTime":"无","steps":"1.小鱿鱼处理干净去内脏去软骨；2.沸水大火焯鱿鱼30秒立即捞出过冰水（火候：大火）；3.调碗汁：生抽1.5勺、蚝油1勺、白糖半小勺、淀粉1勺、盐少许、水3勺搅匀；4.大火热油下葱段大火爆香至微焦（火候：大火）；5.下鱿鱼大火翻炒30秒；6.倒入碗汁大火快速翻炒至汤汁浓稠挂汁（火候：大火）；7.立即出锅","ingredients":"小鱿鱼300g、葱段50g、生抽1.5勺、蚝油1勺、白糖半小勺、淀粉1勺、盐少许、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、煎牛肉4分钟、煎蒜口蘑4分钟、汇合1分钟","name":"蒜香口蘑牛肉粒","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉切2cm粒加盐半小勺、生抽1勺、黑胡椒少许、淀粉1勺腌15分钟；2.口蘑切十字花刀，大蒜切片；3.中火热油下牛肉粒中火煎至每面焦黄（火候：中火），约4分钟盛出；4.锅中加黄油融化，小火下蒜片煎至金黄（火候：小火）；5.下口蘑中火煎至出汁微焦（火候：中火），约3分钟；6.倒回牛肉粒，大火翻炒30秒，补盐调味出锅","ingredients":"牛肉粒200g、口蘑150g、大蒜5瓣、黄油20g、黑胡椒少许、盐1小勺、生抽1勺、淀粉1勺、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"腌虾10分钟、炒蛋1分钟、滑虾2分钟、炒丝瓜2分钟、汇合1分钟","name":"鸡蛋丝瓜炒虾仁","type":"家常菜","prepTime":"腌制10分钟","steps":"1.虾仁开背去虾线，加料酒半勺、盐少许、淀粉半勺腌10分钟；2.丝瓜去皮切滚刀块；3.鸡蛋打散加盐少许搅匀；4.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）；5.中火热油下姜末爆香（火候：中火）；6.下虾仁中火滑炒至变色盛出；7.下丝瓜大火翻炒至变软出汁（火候：大火）；8.倒回虾仁和鸡蛋，加盐半小勺大火翻炒30秒出锅","ingredients":"鸡蛋3个、丝瓜1根、虾仁150g、葱姜适量、盐1小勺、淀粉1勺、料酒1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"吐沙2小时、腌苦瓜10分钟、焯水5分钟、炖煮40分钟","name":"苦瓜白贝汤","type":"家常菜","prepTime":"吐沙2小时","steps":"1.白贝放盐水中吐沙2小时；2.排骨冷水浸泡15分钟，冷水下锅大火焯水捞出（火候：大火）；3.苦瓜去瓤切块，加盐腌10分钟去苦味洗净；4.汤锅大火烧开水（火候：大火）；5.下排骨姜片大火煮沸转小火炖30分钟（火候：小火）；6.下苦瓜继续小火炖10分钟；7.下白贝大火煮至开口（火候：大火），约2分钟；8.加盐1.5小勺调味出锅","ingredients":"苦瓜1根、白贝300g、排骨200g、姜4片、盐1.5小勺、食用油少许、汤锅"},{"category":"home","month":"全年","stepTime":"腌肉5分钟、炒肉沫3分钟、炒韭菜花1分钟","name":"韭菜花","type":"家常菜","prepTime":"腌制5分钟","steps":"1.韭菜花洗净切3cm段，沥干水分；2.肉沫加料酒1勺、生抽1勺、盐少许腌5分钟；3.中火热油下肉沫中火炒散至变色（火候：中火）；4.转大火下韭菜花大火快速翻炒（火候：大火）；5.韭菜花变软后加盐半小勺调味；6.全程大火翻炒约1分钟出锅（韭菜花不能久炒）","ingredients":"韭菜花200g、猪肉沫100g、盐1小勺、生抽1勺、料酒1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"浸泡15分钟、焯水5分钟、炖煮35分钟、收汁2分钟","name":"苹果炖猪排","type":"家常菜","prepTime":"浸泡15分钟","steps":"1.猪排斩段冷水浸泡15分钟；2.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）；3.苹果去皮去核切块；4.中火热油下姜片爆香（火候：中火）；5.下猪排大火翻炒至表面微焦（火候：大火）；6.加料酒半勺、生抽1.5勺炒匀；7.加开水没过猪排大火煮沸；8.转小火炖25分钟（火候：小火）；9.下苹果块继续小火炖10分钟；10.加盐1小勺调味，大火收汁2分钟出锅","ingredients":"猪排300g、苹果1个、姜3片、料酒1勺、生抽1.5勺、盐1小勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、泡粉丝20分钟、炒酸菜3分钟、煮制5分钟","name":"酸菜牛肉粉丝煲","type":"家常菜","prepTime":"腌制15分钟+泡粉丝20分钟","steps":"1.牛肉切丝加料酒半勺、生抽半勺、淀粉1勺、盐少许腌15分钟；2.酸菜切丝洗两遍挤干；3.粉丝温水泡软20分钟；4.中火热油下牛肉丝滑炒至变色盛出（火候：中火）；5.留底油下姜蒜小米辣大火爆香（火候：大火）；6.下酸菜大火翻炒2分钟出酸味；7.加开水大火煮沸；8.下粉丝和牛肉丝小火煮5分钟（火候：小火）；9.加生抽1勺、盐半小勺调味出锅","ingredients":"酸菜150g、牛肉150g、粉丝1把、小米辣2个、葱姜适量、生抽1.5勺、料酒1勺、盐半小勺、淀粉1勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌鸡翅20分钟、煎土豆8分钟、煎鸡翅6分钟、焖5分钟","name":"土豆煎鸡翅","type":"家常菜","prepTime":"腌制20分钟","steps":"1.鸡翅两面划刀，加料酒1勺、生抽1勺、盐半小勺、淀粉1勺腌20分钟；2.土豆去皮切厚片；3.平底锅中火热油（火候：中火）；4.土豆片平铺中火煎至两面金黄盛出（火候：中火），约8分钟；5.补少许油下鸡翅中火煎至两面金黄（火候：中火），约6分钟；6.下姜蒜末爆香；7.加生抽半勺和少量水，盖盖小火焖5分钟（火候：小火）；8.倒回土豆片大火翻炒均匀收汁出锅","ingredients":"鸡翅8个、土豆2个、葱姜蒜适量、生抽1.5勺、料酒1勺、盐1小勺、淀粉1勺、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"打蛋2分钟、蒸制11分钟","name":"海参蒸蛋","type":"家常菜","prepTime":"海参需提前泡发（约2天）","steps":"1.海参提前泡发好切小粒；2.鸡蛋打散加温水（鸡蛋：温水≈1：1.5）和盐少许搅匀；3.蛋液过筛去泡沫；4.蒸锅大火烧开水（火候：大火）；5.蛋液碗盖保鲜膜扎小孔，大火蒸8分钟至蛋液基本凝固；6.揭开保鲜膜撒上海参粒；7.继续大火蒸3分钟（火候：大火）；8.出锅淋生抽1勺、香油几滴、撒葱花","ingredients":"海参1根、鸡蛋3个、温水200ml、生抽1勺、香油几滴、葱花适量、蒸锅"},{"category":"home","month":"全年","stepTime":"备菜5分钟、煮丸3分钟、煮丝瓜3分钟","name":"丝瓜墨鱼丸汤","type":"家常菜","prepTime":"无","steps":"1.丝瓜去皮切滚刀块；2.汤锅大火烧开水（火候：大火）；3.下姜片和墨鱼丸大火煮沸煮3分钟至丸子浮起；4.下丝瓜块大火煮3分钟至丝瓜变软；5.加盐1小勺调味；6.滴几滴油出锅","ingredients":"丝瓜1根、墨鱼丸200g、姜3片、盐1小勺、食用油少许、汤锅"},{"category":"home","month":"全年","stepTime":"浸泡10分钟、焯水2分钟、炒蒜蓉2分钟、翻炒1分钟","name":"蒜蓉西蓝花","type":"家常菜","prepTime":"浸泡10分钟","steps":"1.西蓝花切小朵，盐水浸泡10分钟洗净；2.沸水大火加盐少许和油几滴，焯西蓝花2分钟捞出过凉水（火候：大火）；3.蒜切蒜蓉；4.中火热油下蒜蓉小火炒至金黄出香味（火候：小火）；5.下西蓝花大火翻炒1分钟（火候：大火）；6.加盐半小勺和水淀粉勾薄芡；7.翻炒均匀出锅","ingredients":"西蓝花1颗、大蒜4瓣、盐1小勺、食用油2勺、水淀粉1勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌虾10分钟、煎制5分钟","name":"蒜香黄油胡椒罗氏虾","type":"家常菜","prepTime":"腌制10分钟","steps":"1.罗氏虾剪须去虾线，加盐半小勺、白酒1勺腌10分钟；2.大蒜切末；3.平底锅中火融化黄油（火候：中火）；4.下虾中火煎至变红翻面（火候：中火），约3分钟；5.下蒜末煎至金黄出香；6.撒黑胡椒和盐半小勺翻炒均匀；7.大火收干汁水30秒出锅（火候：大火）","ingredients":"罗氏虾300g、大蒜5瓣、黄油20g、黑胡椒半小勺、盐1小勺、白酒1勺、平底锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、调糊3分钟、初炸3分钟、复炸1分钟、炒汁挂汁1分钟","name":"锅包肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.里脊肉切厚片用刀背拍松，加盐少许、料酒半勺腌15分钟；2.淀粉加水调成浓稠面糊（能挂住筷子）；3.肉片裹满面糊；4.锅中倒油中火烧至六成热（筷子冒泡）；5.逐片下肉片中火炸至微黄捞出（火候：中火），约3分钟；6.大火将油温升至八成热，复炸30秒至金黄酥脆捞出（火候：大火）；7.留底油小火下番茄酱2勺、白糖1.5勺、白醋1勺、盐少许搅匀煮至冒泡（火候：小火）；8.下炸好的肉片大火快速翻拌均匀挂汁（火候：大火）；9.立即出锅装盘","ingredients":"猪里脊肉200g、淀粉100g、番茄酱2勺、白糖1.5勺、白醋1勺、盐半小勺、食用油适量、炒锅"},{"category":"home","month":"全年","stepTime":"浸泡20分钟、焯水5分钟、炖煮60分钟","name":"劲酒煲鸡汤","type":"家常菜","prepTime":"浸泡20分钟","steps":"1.母鸡切块冷水浸泡20分钟去血水；2.冷水下锅大火焯水加姜2片捞出（火候：大火）；3.砂锅大火烧开水（火候：大火）；4.下鸡块姜片红枣大火煮沸；5.转小火炖50分钟（火候：小火）；6.加劲酒50ml和枸杞继续小火炖10分钟；7.加盐1.5小勺调味出锅","ingredients":"老母鸡半只、劲酒50ml、红枣8颗、枸杞少许、姜4片、盐1.5小勺、砂锅"},{"category":"home","month":"全年","stepTime":"炒肉沫3分钟、打蛋1分钟、蒸制12分钟","name":"肉沫水蒸蛋","type":"家常菜","prepTime":"无","steps":"1.肉沫加生抽半勺、盐少许炒熟盛出（火候：中火）；2.鸡蛋打散加温水（1：1.5）和盐少许搅匀；3.蛋液过筛去泡沫；4.将炒好的肉沫铺在碗底；5.倒入蛋液；6.蒸锅大火烧开水（火候：大火）；7.盖保鲜膜扎小孔，大火蒸12分钟（火候：大火）；8.出锅淋生抽半勺、撒葱花","ingredients":"猪肉沫100g、鸡蛋3个、温水200ml、生抽1勺、盐半小勺、葱花适量、蒸锅"},{"category":"home","month":"全年","stepTime":"焯豆腐2分钟、煎豆腐4分钟、煸油渣2分钟、炒韭菜花1分钟","name":"猪油渣炒豆腐韭菜花","type":"家常菜","prepTime":"无","steps":"1.豆腐切块，沸水加盐焯2分钟捞出沥干；2.韭菜花切段；3.中火热油下豆腐块中火煎至两面金黄（火候：中火），约4分钟盛出；4.留底油下猪油渣小火煸出油（火候：小火）；5.转大火下韭菜花大火翻炒30秒（火候：大火）；6.倒回豆腐，加生抽1勺、盐半小勺大火翻炒30秒出锅","ingredients":"猪油渣50g、老豆腐1块、韭菜花150g、盐1小勺、生抽1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌制30分钟、煎制7分钟、焗制5分钟","name":"沙姜煎焗鸡","type":"家常菜","prepTime":"腌制30分钟","steps":"1.鸡切块加料酒1勺、生抽1勺、蚝油1勺、白糖1小勺、淀粉1勺腌30分钟；2.沙姜去皮切碎末，葱切段；3.平底锅中火热油（火候：中火）；4.鸡块皮朝下中火煎至金黄（火候：中火），约4分钟；5.翻面继续煎3分钟至两面金黄；6.撒沙姜末翻炒出香；7.转小火盖盖焗5分钟至鸡肉熟透（火候：小火）；8.开盖大火翻炒收汁，撒葱段出锅（火候：大火）","ingredients":"鸡半只、沙姜1块、葱2根、生抽1.5勺、蚝油1勺、白糖1小勺、淀粉1勺、料酒1勺、食用油2勺、平底锅/砂锅"},{"category":"home","month":"全年","stepTime":"腌鱼10分钟、煎蛋2分钟、煎鱼5分钟、煮汤15分钟","name":"煎蛋鲫鱼豆腐汤","type":"家常菜","prepTime":"腌制10分钟","steps":"1.鲫鱼处理干净两面划刀，加料酒半勺、盐少许腌10分钟，擦干水分；2.豆腐切块；3.大火热油煎两个荷包蛋盛出（火候：大火）；4.补油大火下鲫鱼煎至两面金黄（火候：大火），每面约2分钟；5.下姜片爆香；6.加开水（一定要开水）没过鱼身大火煮沸（火候：大火）；7.大火煮5分钟至汤色变白；8.下豆腐和荷包蛋转小火煮10分钟（火候：小火）；9.加盐1.5小勺调味，撒葱花出锅","ingredients":"鲫鱼1条、豆腐1块、鸡蛋2个、姜4片、葱1根、盐1.5小勺、料酒1勺、食用油2勺、炒锅/汤锅"},{"category":"home","month":"全年","stepTime":"酿豆泡10分钟、炒番茄3分钟、炖煮8分钟","name":"番茄金针菇豆泡酿虾滑","type":"家常菜","prepTime":"无","steps":"1.豆泡切开小口，将虾滑塞入豆泡中填满；2.番茄切块，金针菇去根洗净；3.中火热油下姜末爆香（火候：中火）；4.下番茄块大火炒软出汁（火候：大火）；5.加半碗水大火煮沸；6.下金针菇和酿好的豆泡；7.小火炖8分钟（火候：小火）；8.加生抽1勺、盐1小勺调味；9.撒葱花出锅","ingredients":"番茄2个、金针菇1把、豆泡10个、虾滑200g、葱姜适量、生抽1勺、盐1小勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"处理10分钟、煎蟹2分钟、翻炒2分钟、焖3分钟","name":"姜葱炒三目蟹","type":"家常菜","prepTime":"无","steps":"1.螃蟹处理干净去腮去胃，切块；2.蟹钳拍裂，切口沾淀粉；3.姜切片，葱切段；4.大火热油（油稍多）下姜片大火爆香（火候：大火）；5.蟹块切口朝下中火煎至定型（火候：中火），约2分钟；6.大火翻炒至蟹壳变红（火候：大火）；7.加料酒1勺、盐半小勺和少量水；8.盖盖中火焖3分钟（火候：中火）；9.开盖大火翻炒，下葱段翻炒30秒出锅（火候：大火）","ingredients":"三目蟹2只、姜5片、葱3根、料酒1勺、盐半小勺、淀粉1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌肉10分钟、滑炒2分钟、炒口蘑2分钟、汇合1分钟","name":"口蘑炒猪肉","type":"家常菜","prepTime":"腌制10分钟","steps":"1.肉片加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟；2.口蘑切片，蒜切片；3.中火热油下肉片滑炒至变色盛出（火候：中火）；4.大火下蒜片爆香（火候：大火）；5.下口蘑大火翻炒至出汁变软（火候：大火），约2分钟；6.倒回肉片，加生抽半勺、盐半小勺大火翻炒1分钟出锅","ingredients":"口蘑150g、猪肉片150g、大蒜3瓣、生抽1勺、料酒1勺、盐1小勺、淀粉1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、煎制6分钟","name":"干煎五花肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.五花肉切薄片（约0.3cm）；2.加盐半小勺、黑胡椒少许、孜然粉1小勺抓匀腌15分钟；3.平底锅不放油，中火加热（火候：中火）；4.五花肉片平铺中火煎至出油底面金黄（火候：中火），约3分钟；5.翻面继续煎3分钟至两面焦脆；6.用厨房纸吸去多余油脂；7.出锅装盘","ingredients":"五花肉300g、盐半小勺、黑胡椒少许、孜然粉1小勺、食用油少许、平底锅"},{"category":"home","month":"全年","stepTime":"洗花螺5分钟、焯水2分钟、炒制2分钟","name":"爆炒蒜香芥末花螺","type":"家常菜","prepTime":"无","steps":"1.花螺刷洗干净；2.沸水大火焯花螺2分钟捞出（火候：大火）；3.蒜切末；4.调酱汁：芥末1小勺、生抽1.5勺、料酒1勺、盐少许、水2勺搅匀；5.大火热油下蒜末大火爆香至金黄（火候：大火）；6.下花螺大火翻炒1分钟；7.倒入酱汁大火快速翻炒至汤汁浓稠挂汁（火候：大火）；8.立即出锅","ingredients":"花螺300g、大蒜5瓣、芥末1小勺、生抽1.5勺、料酒1勺、盐少许、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌鱼10分钟、煎制8分钟","name":"香煎码头鱼","type":"家常菜","prepTime":"腌制10分钟","steps":"1.鱼处理干净两面划刀；2.加盐半小勺、姜片腌10分钟，擦干表面水分；3.平底锅中火热油（火候：中火）；4.鱼入锅中火煎至一面金黄定型再翻面（火候：中火），每面约4分钟；5.煎至两面金黄酥脆出锅；6.可挤柠檬汁提鲜","ingredients":"码头鱼2条、盐1小勺、姜3片、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"焯水5分钟、腌制20分钟、蒸制25分钟","name":"沙姜麻油盐焗鸡爪","type":"家常菜","prepTime":"腌制20分钟","steps":"1.鸡爪剪指甲切半；2.冷水下锅大火焯水加料酒捞出（火候：大火）；3.沙姜切碎末；4.鸡爪加沙姜末、麻油1勺、盐1小勺、生抽1勺拌匀腌20分钟；5.蒸锅大火烧开水（火候：大火）；6.鸡爪入蒸锅大火蒸25分钟（火候：大火）；7.出锅拌匀即可","ingredients":"鸡爪300g、沙姜1块、麻油1勺、盐1小勺、生抽1勺、料酒1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"备菜5分钟、煮丸3分钟、煮丝瓜3分钟","name":"潮汕肉饼虾丸丝瓜汤","type":"家常菜","prepTime":"无","steps":"1.丝瓜去皮切滚刀块，肉饼切片；2.汤锅大火烧开水（火候：大火）；3.下姜片、肉饼和虾丸大火煮沸煮3分钟；4.下丝瓜块大火煮3分钟至变软；5.加盐1小勺调味；6.滴几滴油出锅","ingredients":"潮汕肉饼100g、手工虾丸100g、丝瓜1根、姜3片、盐1小勺、食用油少许、汤锅"},{"category":"home","month":"全年","stepTime":"焯芥兰1分钟、炒制1分钟","name":"炒芥兰","type":"家常菜","prepTime":"无","steps":"1.芥兰切段，粗梗对半切开；2.沸水大火加盐和油几滴，焯芥兰梗30秒再下叶子焯15秒捞出过凉水（火候：大火）；3.蒜切末；4.大火热猪油（火候：大火）；5.下蒜末大火爆香；6.下芥兰大火快速翻炒（火候：大火）；7.加鱼露1勺、盐少许调味；8.翻炒30秒出锅","ingredients":"芥兰300g、大蒜3瓣、猪油1勺、鱼露1勺、盐少许、炒锅"},{"category":"home","month":"全年","stepTime":"腌制30分钟、蒸制25分钟","name":"广东豉汁干蒸鸡","type":"家常菜","prepTime":"腌制30分钟","steps":"1.鸡切块加料酒1勺、生抽1.5勺、白糖1小勺、淀粉1勺、蒜末、豆豉（剁碎）、食用油1勺拌匀腌30分钟；2.蒸锅大火烧开水（火候：大火）；3.鸡块装盘入锅大火蒸25分钟（火候：大火）；4.出锅撒葱花即可","ingredients":"鸡半只、豆豉1勺、蒜末1勺、生抽1.5勺、白糖1小勺、淀粉1勺、料酒1勺、食用油1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"焯肥牛1分钟、炒洋葱2分钟、煎蛋3分钟","name":"洋葱肥牛抱蛋","type":"家常菜","prepTime":"无","steps":"1.肥牛沸水大火焯至变色立即捞出（火候：大火），约30秒；2.洋葱切丝；3.鸡蛋打散加盐少许搅匀；4.中火热油下洋葱丝中火炒软至透明（火候：中火），约2分钟；5.下肥牛加生抽1勺、蚝油1勺翻炒均匀；6.将肥牛洋葱推到锅边，锅中补少许油；7.倒入蛋液转小火煎至底部凝固（火候：小火）；8.轻轻推动让蛋液包裹肥牛；9.蛋液基本凝固出锅","ingredients":"肥牛卷200g、洋葱半个、鸡蛋3个、生抽1勺、蚝油1勺、盐半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"吐沙2小时、腌虾10分钟、炒底料3分钟、翻炒焖制5分钟","name":"干锅香辣花甲虾","type":"家常菜","prepTime":"吐沙2小时","steps":"1.花甲放盐水吐沙2小时；2.虾开背去虾线加料酒半勺腌10分钟；3.中火热油下姜蒜干辣椒花椒小火炒香（火候：小火）；4.加豆瓣酱1勺小火炒出红油（火候：小火）；5.转大火下虾翻炒至变红（火候：大火）；6.下花甲大火翻炒，加料酒半勺、生抽1勺；7.盖盖大火焖至花甲全部开口（火候：大火），约2分钟；8.开盖大火翻炒收汁，撒葱段出锅","ingredients":"花甲300g、虾200g、干辣椒5个、花椒1小勺、豆瓣酱1勺、葱姜蒜适量、生抽1勺、料酒1勺、盐少许、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"浸泡20分钟、焯水5分钟、炖煮55分钟","name":"玉米胡萝卜排骨汤","type":"家常菜","prepTime":"浸泡20分钟","steps":"1.排骨冷水浸泡20分钟去血水；2.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）；3.玉米切段，胡萝卜切滚刀块；4.砂锅大火烧开水（火候：大火）；5.下排骨姜片大火煮沸转小火炖35分钟（火候：小火）；6.下玉米胡萝卜继续小火炖20分钟；7.加盐1.5小勺调味出锅","ingredients":"排骨300g、玉米1根、胡萝卜1根、姜4片、盐1.5小勺、料酒1勺、砂锅"},{"category":"home","month":"全年","stepTime":"煎鱼4分钟、焖煮3分钟","name":"潮汕半煎煮竹仔鱼","type":"家常菜","prepTime":"无","steps":"1.鱼处理干净两面划刀，擦干水分；2.平底锅中火热油（火候：中火）；3.鱼入锅中火煎至一面金黄翻面（火候：中火），每面约2分钟至半熟；4.下姜片爆香；5.加普宁豆酱1.5勺和小半碗水；6.盖盖中火焖煮3分钟（火候：中火）；7.开盖撒葱段出锅","ingredients":"竹仔鱼2条、普宁豆酱1.5勺、姜3片、葱1根、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"浸泡15分钟、焯水5分钟、炖煮45分钟","name":"荔枝炖鸡汤","type":"家常菜","prepTime":"浸泡15分钟","steps":"1.鸡切块冷水浸泡15分钟；2.冷水下锅大火焯水加姜2片捞出（火候：大火）；3.荔枝去壳去核；4.砂锅大火烧开水（火候：大火）；5.下鸡块姜片红枣大火煮沸；6.转小火炖40分钟（火候：小火）；7.下荔枝肉枸杞继续小火炖5分钟；8.加盐1.5小勺调味出锅","ingredients":"鸡半只、荔枝10颗、红枣8颗、枸杞少许、姜4片、盐1.5小勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌制20分钟、煎制4分钟、煎葱3分钟、炖煮8分钟、收汁2分钟","name":"葱烧大排","type":"家常菜","prepTime":"腌制20分钟","steps":"1.猪排用刀背拍松，加料酒半勺、生抽半勺、淀粉1勺、盐少许腌20分钟；2.葱切长段；3.中火热油下猪排中火煎至两面金黄（火候：中火），约4分钟盛出；4.留底油下葱段姜片小火煎至葱段焦黄出香（火候：小火）；5.倒回猪排，加料酒半勺、生抽1勺、老抽1勺、白糖1小勺；6.加开水没过猪排大火煮沸；7.转小火炖8分钟至入味（火候：小火）；8.大火收汁至汤汁浓稠（火候：大火），约2分钟","ingredients":"猪大排2块、葱50g、姜3片、生抽1.5勺、老抽1勺、料酒1勺、白糖1小勺、淀粉1勺、盐半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"焯水10分钟、卤制60分钟、浸泡30分钟","name":"潮汕卤肉拼盘","type":"家常菜","prepTime":"浸泡30分钟","steps":"1.所有肉材处理干净；2.冷水下锅大火焯水5分钟捞出洗净（火候：大火）；3.砂锅加足量水大火烧开（火候：大火）；4.下所有肉材、姜葱、八角桂皮香叶；5.加老抽2勺、生抽3勺、料酒2勺、冰糖30g；6.大火煮沸转小火卤制1小时（火候：小火）；7.关火后浸泡30分钟更入味；8.捞出切片摆盘","ingredients":"五花肉200g、猪舌1条、猪耳1个、老抽2勺、生抽3勺、料酒2勺、冰糖30g、八角3颗、桂皮1段、香叶3片、姜5片、葱1根、砂锅"},{"category":"home","month":"全年","stepTime":"泡米线30分钟、炒料5分钟、煮制3分钟","name":"酸汤肉沫米线","type":"家常菜","prepTime":"泡米线30分钟","steps":"1.米线温水泡发30分钟；2.酸菜切丝，金针菇去根；3.中火热油下肉沫炒散至变色（火候：中火）；4.下姜蒜小米辣大火爆香（火候：大火）；5.下酸菜大火翻炒2分钟出酸味；6.加酸辣酱1勺、生抽1勺炒匀；7.加开水大火煮沸（火候：大火）；8.下金针菇和米线小火煮3分钟（火候：小火）；9.加盐半小勺调味出锅","ingredients":"米线200g、肉沫100g、酸菜100g、金针菇1把、小米辣2个、酸辣酱1勺、生抽1勺、盐半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"焯肥牛1分钟、炒洋葱2分钟、煎蛋3分钟","name":"肥牛抱蛋","type":"家常菜","prepTime":"无","steps":"1.肥牛沸水大火焯至变色立即捞出（火候：大火），约30秒；2.洋葱切丝；3.鸡蛋打散加盐少许搅匀；4.中火热油下洋葱丝中火炒软（火候：中火），约2分钟；5.下肥牛加生抽1勺翻炒均匀；6.倒入蛋液转小火煎至底部凝固（火候：小火）；7.轻轻推动使蛋液包裹肥牛；8.蛋液基本凝固出锅","ingredients":"肥牛200g、鸡蛋3个、洋葱半个、生抽1勺、盐半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌制30分钟、蒸制30分钟、撕丝5分钟、做葱油3分钟","name":"沙姜葱油捞鸡","type":"家常菜","prepTime":"腌制30分钟","steps":"1.鸡处理干净，内外抹盐和料酒腌30分钟；2.蒸锅大火烧开水（火候：大火）；3.鸡入锅大火蒸30分钟至熟（火候：大火）；4.取出放凉手撕成丝；5.沙姜切末，葱切葱花；6.中火热油下沙姜末和葱花中火爆香至葱变焦黄（火候：中火）；7.加生抽2勺、香油1勺、白糖1小勺、盐少许搅匀；8.淋在鸡丝上拌匀","ingredients":"整鸡1只（约1kg）、沙姜1块、葱50g、生抽2勺、香油1勺、白糖1小勺、盐1小勺、蒸锅"},{"category":"home","month":"全年","stepTime":"泡发30分钟、酿菌10分钟、蒸制15分钟","name":"羊肚菌酿虾滑","type":"家常菜","prepTime":"泡发30分钟","steps":"1.羊肚菌温水泡发30分钟，洗净泥沙剪去菌柄；2.虾滑加生抽半勺、料酒半勺、淀粉1勺、姜末拌匀；3.将虾滑小心塞入羊肚菌中；4.蒸锅大火烧开水（火候：大火）；5.摆盘放姜片，大火蒸15分钟（火候：大火）；6.出锅淋生抽半勺即可","ingredients":"羊肚菌10个、虾滑200g、姜2片、料酒1勺、生抽1勺、淀粉1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"腌鱼10分钟、蒸制12分钟","name":"清蒸多宝鱼","type":"家常菜","prepTime":"腌制10分钟","steps":"1.鱼处理干净两面划刀，抹盐和料酒腌10分钟；2.盘底铺姜片葱段，放上鱼；3.蒸锅大火烧开水（火候：大火）；4.鱼入锅大火蒸10-12分钟（根据鱼大小）（火候：大火）；5.倒掉盘中蒸出的腥水；6.铺上葱丝姜丝；7.淋蒸鱼豉油2勺；8.大火热油至冒烟浇在葱姜丝上激香（火候：大火）","ingredients":"多宝鱼1条、葱姜适量、料酒1勺、盐1小勺、蒸鱼豉油2勺、食用油2勺、蒸锅"},{"category":"home","month":"全年","stepTime":"备菜5分钟、炒料3分钟、煮制3分钟","name":"上汤娃娃菜","type":"家常菜","prepTime":"无","steps":"1.娃娃菜纵向切四瓣；2.咸蛋皮蛋切丁，火腿肠切片，蒜切片；3.中火热油下蒜片小火煎至金黄（火候：小火）；4.下咸蛋丁小火炒至起沙（火候：小火）；5.加高汤大火煮沸（火候：大火）；6.下皮蛋丁和火腿肠；7.下娃娃菜大火煮3分钟至软（火候：大火）；8.加盐半小勺调味出锅","ingredients":"娃娃菜2颗、咸蛋1个、皮蛋1个、火腿肠1根、大蒜3瓣、高汤300ml、盐半小勺、食用油1勺、炒锅/汤锅"},{"category":"home","month":"全年","stepTime":"备菜3分钟、炒蛋1分钟、翻炒2分钟","name":"黄瓜火腿炒鸡蛋","type":"家常菜","prepTime":"无","steps":"1.黄瓜切片，火腿肠切片；2.鸡蛋打散加盐少许搅匀；3.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）；4.中火热油下黄瓜火腿肠大火翻炒1分钟（火候：大火）；5.倒回鸡蛋，加盐半小勺大火翻炒30秒出锅","ingredients":"黄瓜1根、火腿肠1根、鸡蛋3个、盐1小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌制30分钟、卤制40分钟、浸泡30分钟","name":"广东酱油鸡","type":"家常菜","prepTime":"浸泡30分钟","steps":"1.鸡处理干净，用盐和料酒内外抹匀腌30分钟；2.砂锅加清水（能没过鸡）、生抽100ml、老抽2勺、冰糖30g、八角香叶姜葱；3.大火煮沸后转小火（火候：小火）；4.将鸡放入卤汁中，小火浸泡卤制40分钟，中间翻面一次；5.关火后浸泡30分钟更入味；6.取出晾凉斩块摆盘；7.淋少许卤汁","ingredients":"整鸡1只（约1kg）、生抽100ml、老抽2勺、冰糖30g、八角2颗、香叶2片、姜5片、葱2根、砂锅"},{"category":"home","month":"全年","stepTime":"腌制20分钟、煎制6分钟","name":"盐葱猪排","type":"家常菜","prepTime":"腌制20分钟","steps":"1.猪排用刀背拍松，加盐半小勺、生抽1勺、黑胡椒少许、淀粉1勺腌20分钟；2.平底锅中火热油（火候：中火）；3.猪排入锅中火煎至一面金黄翻面（火候：中火），每面约3分钟；4.煎至两面金黄用筷子能轻松扎透即熟；5.出锅后撒上大量葱花和盐半小勺；6.大火热油浇在葱花上激香即可（火候：大火）","ingredients":"猪排2块、盐1小勺、葱花30g、生抽1勺、黑胡椒少许、淀粉1勺、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"腌虾10分钟、滑炒2分钟、炒口蘑2分钟、滑蛋2分钟","name":"口蘑虾仁滑蛋","type":"家常菜","prepTime":"腌制10分钟","steps":"1.虾仁开背去虾线，加料酒半勺、盐少许、淀粉半勺腌10分钟；2.口蘑切片；3.鸡蛋打散加盐少许搅匀；4.中火热油下虾仁中火滑炒至变色盛出（火候：中火）；5.锅中补油下口蘑大火翻炒至出汁（火候：大火），约2分钟；6.倒回虾仁，将蛋液均匀淋入锅中；7.转小火待蛋液底部凝固轻轻推动（火候：小火）；8.蛋液基本凝固即可出锅（不要炒太老）","ingredients":"口蘑100g、虾仁150g、鸡蛋3个、盐1小勺、淀粉1勺、料酒1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"焯豆腐2分钟、煎豆腐4分钟、煎葱2分钟、焖煮2分钟","name":"葱烧豆腐","type":"家常菜","prepTime":"无","steps":"1.豆腐切厚块，沸水加盐焯2分钟捞出沥干；2.葱切长段；3.中火热油下豆腐块中火煎至两面金黄盛出（火候：中火），约4分钟；4.留底油下葱段小火煎至焦黄出香（火候：小火）；5.倒回豆腐，加生抽1.5勺、老抽1勺、白糖1小勺、盐少许；6.加少量水大火煮沸（火候：大火）；7.转小火焖2分钟入味（火候：小火）；8.水淀粉勾薄芡，大火收汁出锅（火候：大火）","ingredients":"老豆腐1块、葱50g、生抽1.5勺、老抽1勺、白糖1小勺、水淀粉1勺、盐少许、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"备菜3分钟、煮汤5分钟","name":"潮汕肉饼丸子汤","type":"家常菜","prepTime":"无","steps":"1.肉饼切片，鱼丸对半切开；2.汤锅大火烧开水（火候：大火）；3.下姜片肉饼和鱼丸大火煮沸煮3分钟；4.加盐1小勺调味；5.撒葱花，滴几滴油出锅","ingredients":"潮汕肉饼100g、鱼丸100g、姜3片、葱1根、盐1小勺、食用油少许、汤锅"},{"category":"home","month":"全年","stepTime":"处理15分钟、炸虾2分钟、炒蒜蓉3分钟、焖煮10分钟、收汁2分钟","name":"蒜香小龙虾","type":"家常菜","prepTime":"无","steps":"1.小龙虾刷洗干净去虾线；2.大蒜剁成蒜蓉（分两份）；3.大火热油（油多）下小龙虾大火炸至变红捞出（火候：大火），约2分钟；4.留底油小火下一半蒜蓉炒至金黄（火候：小火）；5.下姜片和另一半生蒜蓉大火爆香（火候：大火）；6.下小龙虾大火翻炒；7.加生抽2勺、蚝油1勺、盐1小勺炒匀；8.倒入啤酒1罐大火煮沸；9.转小火焖10分钟入味（火候：小火）；10.大火收汁至汤汁浓稠撒葱段出锅（火候：大火）","ingredients":"小龙虾500g、大蒜1整头、姜5片、葱2根、生抽2勺、蚝油1勺、啤酒1罐、盐1小勺、食用油3勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、滑炒2分钟、炒酸菜2分钟、汇合1分钟","name":"酸菜炒牛肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉逆纹切丝加料酒半勺、生抽半勺、淀粉1勺、盐少许腌15分钟；2.酸菜切丝洗两遍挤干水分；3.中火热油下牛肉丝大火滑炒至变色盛出（火候：大火）；4.留底油下姜片小米辣大火爆香（火候：大火）；5.下酸菜大火翻炒2分钟炒干水分出酸味；6.加白糖半小勺提鲜；7.倒回牛肉丝，加生抽半勺大火翻炒30秒出锅","ingredients":"牛肉200g、酸菜150g、小米辣2个、姜3片、生抽1勺、料酒1勺、淀粉1勺、盐半小勺、白糖半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"泡发20分钟、焯鱼面1分钟、炒制3分钟","name":"豆芽胡萝卜丝鱼面","type":"家常菜","prepTime":"泡发20分钟","steps":"1.鱼面温水泡发20分钟；2.豆芽洗净，胡萝卜切细丝；3.沸水大火焯鱼面1分钟捞出（火候：大火）；4.大火热油下葱段大火爆香（火候：大火）；5.下胡萝卜丝大火翻炒1分钟；6.下豆芽大火翻炒30秒；7.下鱼面，加生抽1勺、盐1小勺大火翻炒1分钟出锅","ingredients":"鱼面200g、豆芽100g、胡萝卜半根、葱段适量、盐1小勺、生抽1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"焯麻叶2分钟、炒制2分钟","name":"普宁豆酱炒麻叶","type":"家常菜","prepTime":"无","steps":"1.麻叶摘嫩叶洗净；2.沸水大火焯麻叶2分钟捞出过凉水挤干（火候：大火）；3.蒜切末；4.大火热猪油和食用油（火候：大火）；5.下蒜末大火爆香；6.下麻叶大火快速翻炒（火候：大火）；7.加普宁豆酱1.5勺翻炒均匀；8.翻炒1分钟入味出锅","ingredients":"麻叶300g、普宁豆酱1.5勺、大蒜3瓣、猪油1勺、食用油1勺、炒锅"},{"category":"home","month":"全年","stepTime":"煮鸡爪15分钟、冰水10分钟、腌制2小时","name":"酸辣柠檬鸡爪","type":"家常菜","prepTime":"腌制2小时","steps":"1.鸡爪剪指甲切半；2.冷水下锅大火加姜片料酒煮沸，转小火煮15分钟至熟（火候：大火→小火）；3.捞出过冰水泡10分钟（使皮更脆）；4.柠檬切片去籽，小米辣切圈；5.调酱汁：白醋2勺、白糖1勺、盐1小勺、生抽2勺、柠檬片、小米辣搅匀；6.鸡爪控干水分放入酱汁拌匀；7.密封冷藏腌制2小时以上更入味","ingredients":"鸡爪300g、柠檬1个、小米辣3个、姜3片、葱1根、料酒1勺、白醋2勺、白糖1勺、盐1小勺、生抽2勺、汤锅"},{"category":"home","month":"全年","stepTime":"腌制20分钟、煎制3分钟、静置3分钟","name":"盐葱牛肉","type":"家常菜","prepTime":"腌制20分钟","steps":"1.牛肉切厚片（约1.5cm），用厨房纸吸干表面水分；2.撒盐半小勺、黑胡椒少许腌20分钟；3.平底锅大火加热至冒烟（火候：大火）；4.下黄油融化；5.放入牛排大火煎至一面焦黄翻面（火候：大火），每面约1.5分钟；6.煎好后静置3分钟锁住肉汁；7.切块装盘，撒大量葱花和盐半小勺；8.大火热油浇在葱花上激香","ingredients":"牛肉200g、盐1小勺、葱花30g、黑胡椒少许、黄油20g、平底锅"},{"category":"home","month":"全年","stepTime":"腌制20分钟、裹粉5分钟、初炸8分钟、复炸1分钟","name":"椒盐脆皮猪排","type":"家常菜","prepTime":"腌制20分钟","steps":"1.猪排用刀背拍松，加料酒1勺、盐半小勺腌20分钟；2.准备三个碗：淀粉、打散的鸡蛋、面包糠；3.猪排依次沾淀粉→蛋液→面包糠按压实；4.锅中倒油中火烧至六成热（筷子冒泡）；5.下猪排中火炸至金黄（火候：中火），约4分钟一面；6.捞出大火复炸30秒更加酥脆（火候：大火）；7.切块撒椒盐装盘","ingredients":"猪排2块、鸡蛋1个、面包糠50g、淀粉30g、盐半小勺、椒盐1小勺、料酒1勺、食用油适量、炒锅"},{"category":"home","month":"全年","stepTime":"泡发2小时、炖煮25分钟","name":"冬瓜鱿鱼汤","type":"家常菜","prepTime":"泡发2小时","steps":"1.鱿鱼干和干贝提前泡发2小时，鱿鱼干切丝；2.冬瓜去皮去瓤切厚块；3.汤锅大火烧开水（火候：大火）；4.下姜片、鱿鱼丝、干贝大火煮沸；5.转小火炖15分钟出鲜味（火候：小火）；6.下冬瓜块继续小火炖10分钟至冬瓜透明；7.加盐1.5小勺调味出锅","ingredients":"冬瓜300g、鱿鱼干1只、干贝10粒、姜4片、盐1.5小勺、食用油少许、汤锅"},{"category":"home","month":"全年","stepTime":"备菜3分钟、炒制1分钟","name":"炒菜心","type":"家常菜","prepTime":"无","steps":"1.菜心洗净切段，粗梗对半；2.蒜切末；3.大火热猪油至冒烟（火候：大火）；4.下蒜末大火爆香10秒；5.先下菜梗大火翻炒30秒；6.再下菜叶大火翻炒30秒；7.加鱼露1勺、盐少许调味；8.翻炒均匀出锅","ingredients":"菜心300g、大蒜3瓣、猪油1勺、鱼露1勺、盐少许、炒锅"},{"category":"home","month":"全年","stepTime":"烤紫菜2分钟、炒蛋1分钟、炒饭3分钟、汇合1分钟","name":"紫菜炒饭","type":"家常菜","prepTime":"无","steps":"1.紫菜放平底锅小火烤至变绿变脆，捏碎（火候：小火）；2.鸡蛋打散，虾仁切丁加盐少许腌5分钟；3.大火热油下蛋液大火滑炒至凝固盛出（火候：大火）；4.中火热猪油下虾仁炒至变色（火候：中火）；5.下米饭大火翻炒打散炒热（火候：大火）；6.加生抽1勺、盐半小勺炒匀；7.倒回鸡蛋和紫菜碎大火翻炒均匀；8.撒葱花出锅","ingredients":"紫菜1片、米饭1碗、鸡蛋2个、虾仁50g、葱花适量、生抽1勺、盐半小勺、猪油1勺、食用油1勺、炒锅"},{"category":"home","month":"全年","stepTime":"吐沙2小时、炒料2分钟、焖制2分钟、收汁1分钟","name":"豉汁炒花甲","type":"家常菜","prepTime":"吐沙2小时","steps":"1.花甲放盐水吐沙2小时；2.豆豉剁碎；3.大火热油下蒜末豆豉小米辣大火爆香（火候：大火）；4.下花甲大火翻炒；5.加料酒1勺、生抽1勺、蚝油1勺炒匀；6.盖盖大火焖至花甲全部开口（火候：大火），约2分钟；7.开盖大火翻炒收汁出锅（花甲没开口的扔掉）","ingredients":"花甲400g、豆豉1勺、蒜末1勺、小米辣2个、生抽1勺、蚝油1勺、料酒1勺、盐少许、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"煮鸭爪20分钟、冰水10分钟、泡制4小时","name":"酸辣泡鸭爪","type":"家常菜","prepTime":"泡制4小时","steps":"1.鸭爪剪指甲切半；2.冷水下锅大火加姜片料酒煮沸，转小火煮20分钟至熟（火候：大火→小火）；3.捞出过冰水泡10分钟；4.泡椒切碎，蒜切片；5.调泡汁：白醋3勺、白糖1.5勺、盐1小勺、泡椒碎、蒜片加凉白开搅匀；6.鸭爪控干放入泡汁中；7.密封冷藏泡制4小时以上入味","ingredients":"鸭爪300g、泡椒5个、白醋3勺、白糖1.5勺、盐1小勺、姜3片、蒜3瓣、料酒1勺、汤锅"},{"category":"home","month":"全年","stepTime":"泡粉丝20分钟、腌茄子10分钟、煎茄子5分钟、炒料5分钟、煲制5分钟","name":"海味肉沫茄子粉丝煲","type":"家常菜","prepTime":"泡粉丝20分钟","steps":"1.粉丝温水泡软20分钟；2.茄子切条加盐腌10分钟出水挤干；3.虾仁切丁加盐少许腌5分钟；4.中火热油（油多）下茄子条中火煎软盛出（火候：中火）；5.留底油下肉沫炒散至变色；6.下蒜末豆瓣酱小火炒出红油（火候：小火）；7.下虾仁丁翻炒；8.砂锅底铺粉丝，放茄子条和肉沫虾仁；9.加生抽1.5勺、蚝油1勺、盐少许和少量水；10.大火煮沸转小火煲5分钟（火候：小火）","ingredients":"茄子2根、肉沫100g、粉丝1把、虾仁50g、蒜末1勺、生抽1.5勺、蚝油1勺、豆瓣酱半勺、盐少许、食用油3勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、滑炒1分钟、滑蛋3分钟","name":"牛肉滑蛋","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉逆纹切薄片加料酒1勺、生抽1勺、淀粉1勺、盐少许腌15分钟；2.鸡蛋打散加盐少许搅匀；3.中火热油下牛肉片大火滑炒至变色立即盛出（火候：大火，约30秒，不要炒老）；4.锅中补油，将蛋液和牛肉片混合；5.转小火倒入锅中（火候：小火）；6.待底部凝固轻轻推动；7.蛋液基本凝固即可出锅（保持嫩滑口感）","ingredients":"牛肉150g、鸡蛋3个、淀粉1勺、生抽1勺、料酒1勺、盐半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌鱼10分钟、煎鱼5分钟、煮汤15分钟","name":"鲫鱼豆腐汤","type":"家常菜","prepTime":"腌制10分钟","steps":"1.鲫鱼处理干净两面划刀，加料酒半勺、盐少许腌10分钟，擦干水分；2.豆腐切块；3.大火热油下鲫鱼大火煎至两面金黄（火候：大火），每面约2分钟；4.下姜片爆香；5.加开水（一定要开水）没过鱼身大火煮沸（火候：大火）；6.大火煮5分钟至汤色奶白；7.下豆腐块转小火煮10分钟（火候：小火）；8.加盐1.5小勺调味，撒葱花出锅","ingredients":"鲫鱼1条、豆腐1块、姜4片、葱1根、盐1.5小勺、料酒1勺、食用油2勺、炒锅/汤锅"},{"category":"home","month":"全年","stepTime":"浸泡15分钟、焯水5分钟、电饭煲两次煮饭程序约40分钟","name":"电饭煲酱油排骨","type":"家常菜","prepTime":"浸泡15分钟","steps":"1.排骨斩段冷水浸泡15分钟去血水；2.冷水下锅大火焯水加姜3片料酒半勺捞出（火候：大火）；3.将排骨放入电饭煲；4.加生抽2勺、老抽1勺、料酒半勺、冰糖15g、姜片蒜瓣；5.加少量水（约排骨的一半高度）；6.按煮饭键；7.跳闸后翻拌均匀，再按一次煮饭键收汁；8.出锅撒葱花","ingredients":"排骨300g、生抽2勺、老抽1勺、料酒1勺、冰糖15g、姜5片、蒜3瓣、电饭煲"},{"category":"home","month":"全年","stepTime":"腌制20分钟、裹粉3分钟、炸制6分钟、炒汁挂汁1分钟","name":"糖醋菠萝小猪排","type":"家常菜","prepTime":"腌制20分钟","steps":"1.排骨斩小段加料酒1勺、盐半小勺腌20分钟；2.菠萝切块；3.腌好的排骨裹满淀粉；4.锅中倒油中火烧至六成热（火候：中火）；5.下排骨中火炸至金黄熟透捞出（火候：中火），约5分钟；6.大火复炸1分钟至酥脆捞出（火候：大火）；7.留底油小火下番茄酱2勺、白糖1.5勺、白醋1勺、盐少许搅匀煮至冒泡（火候：小火）；8.下排骨和菠萝大火快速翻拌挂汁（火候：大火）；9.立即出锅装盘","ingredients":"猪小排300g、菠萝半个、番茄酱2勺、白糖1.5勺、白醋1勺、淀粉50g、盐半小勺、料酒1勺、食用油适量、炒锅"},{"category":"home","month":"全年","stepTime":"腌制1小时、电饭煲两次煮饭程序约40分钟","name":"电饭煲酱油手撕鸡","type":"家常菜","prepTime":"腌制1小时","steps":"1.鸡处理干净，用牙签在鸡身上扎孔方便入味；2.加生抽3勺、老抽1勺、蚝油1勺、料酒1勺、姜片葱段内外抹匀腌1小时；3.电饭煲底铺姜片葱段；4.放入腌好的鸡，倒入腌料汁；5.按煮饭键；6.跳闸后翻面再按一次煮饭键；7.取出放凉手撕成丝；8.淋上锅底汤汁","ingredients":"整鸡1只（约1kg）、生抽3勺、老抽1勺、蚝油1勺、姜5片、葱2根、料酒1勺、电饭煲"},{"category":"home","month":"全年","stepTime":"吐沙2小时、焖花甲2分钟、炒丝瓜2分钟","name":"丝瓜炒花甲","type":"家常菜","prepTime":"吐沙2小时","steps":"1.花甲放盐水吐沙2小时；2.丝瓜去皮切滚刀块；3.大火热油下姜丝蒜末大火爆香（火候：大火）；4.下花甲大火翻炒；5.加料酒半勺盖盖大火焖至花甲开口（火候：大火），约2分钟；6.下丝瓜块大火翻炒至变软出汁（火候：大火）；7.加盐1小勺调味出锅（花甲没开口的扔掉）","ingredients":"丝瓜1根、花甲300g、蒜末1勺、姜丝适量、盐1小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌虾10分钟、调糊3分钟、炸制3分钟、炒汁挂汁1分钟","name":"锅包虾","type":"家常菜","prepTime":"腌制10分钟","steps":"1.虾去壳去虾线留尾，加盐少许、料酒半勺腌10分钟；2.淀粉加鸡蛋和水调成浓稠面糊；3.虾裹满面糊；4.锅中倒油中火烧至六成热（火候：中火）；5.逐只下虾中火炸至微黄捞出（火候：中火），约2分钟；6.大火复炸30秒至酥脆捞出（火候：大火）；7.留底油小火下番茄酱2勺、白糖1.5勺、白醋1勺、盐少许搅匀煮至冒泡（火候：小火）；8.下虾大火快速翻拌挂汁（火候：大火）；9.立即出锅","ingredients":"虾200g、淀粉80g、番茄酱2勺、白糖1.5勺、白醋1勺、鸡蛋1个、盐半小勺、食用油适量、炒锅"},{"category":"home","month":"全年","stepTime":"浸泡15分钟、腌制30分钟、蒸制25分钟","name":"干蒸排骨","type":"家常菜","prepTime":"腌制30分钟","steps":"1.排骨斩小段冷水浸泡15分钟去血水，沥干；2.加豆豉（剁碎）、蒜末、生抽1.5勺、淀粉1勺、白糖1小勺、料酒1勺、食用油1勺拌匀腌30分钟；3.蒸锅大火烧开水（火候：大火）；4.排骨装盘入锅大火蒸25分钟（火候：大火）；5.出锅撒葱花即可","ingredients":"排骨300g、豆豉1勺、蒜末1勺、生抽1.5勺、淀粉1勺、白糖1小勺、料酒1勺、食用油1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"泡发1小时、浸泡15分钟、焯水5分钟、炖煮55分钟","name":"菌菇鸡汤","type":"家常菜","prepTime":"泡发1小时","steps":"1.干香菇提前泡发1小时切半；2.鸡切块冷水浸泡15分钟去血水；3.冷水下锅大火焯水加姜2片捞出（火候：大火）；4.杏鲍菇切片；5.砂锅大火烧开水（火候：大火）；6.下鸡块姜片香菇红枣大火煮沸；7.转小火炖45分钟（火候：小火）；8.下杏鲍菇枸杞继续小火炖10分钟；9.加盐1.5小勺调味出锅","ingredients":"鸡半只、干香菇8朵、杏鲍菇1根、红枣8颗、枸杞少许、姜4片、盐1.5小勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、泡菠萝10分钟、滑炒2分钟、翻炒2分钟","name":"菠萝炒牛肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉逆纹切片加料酒1勺、生抽1勺、淀粉1勺、白糖半小勺、盐少许腌15分钟；2.菠萝切块用盐水泡10分钟；3.青椒切块；4.中火热油下牛肉大火滑炒至变色盛出（火候：大火）；5.留底油下青椒大火翻炒1分钟（火候：大火）；6.下菠萝块大火翻炒30秒；7.倒回牛肉，加生抽半勺大火翻炒30秒出锅","ingredients":"牛肉200g、菠萝半个、青椒1个、生抽1.5勺、白糖1小勺、淀粉1勺、料酒1勺、盐半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"处理10分钟、蒸制8分钟","name":"蒜蓉小鱿鱼","type":"家常菜","prepTime":"无","steps":"1.小鱿鱼处理干净去内脏去软骨，切圈但不切断；2.蒜蓉加生抽1.5勺、蚝油1勺、白糖半小勺搅匀；3.蒜蓉酱铺在鱿鱼上；4.蒸锅大火烧开水（火候：大火）；5.大火蒸8分钟（火候：大火）；6.出锅撒葱花，大火热油浇上激香（火候：大火）","ingredients":"小鱿鱼300g、蒜蓉2勺、生抽1.5勺、蚝油1勺、白糖半小勺、食用油2勺、蒸锅"},{"category":"home","month":"全年","stepTime":"浸泡10分钟、焯水2分钟、炒蒜蓉2分钟、翻炒1分钟","name":"炒西兰花","type":"家常菜","prepTime":"浸泡10分钟","steps":"1.西蓝花切小朵盐水浸泡10分钟；2.沸水大火加盐和油几滴，焯西蓝花2分钟捞出过凉水（火候：大火）；3.蒜切末；4.中火热油下蒜末小火炒至金黄（火候：小火）；5.下西蓝花大火翻炒1分钟（火候：大火）；6.加盐半小勺调味翻炒均匀出锅","ingredients":"西蓝花1颗、大蒜3瓣、盐1小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌鱼10分钟、煎鱼5分钟、煮汤17分钟","name":"鲫鱼豆腐丝瓜汤","type":"家常菜","prepTime":"腌制10分钟","steps":"1.鲫鱼处理干净两面划刀，加料酒半勺、盐少许腌10分钟擦干水分；2.豆腐切块，丝瓜去皮切滚刀块；3.大火热油下鲫鱼大火煎至两面金黄（火候：大火），每面约2分钟；4.下姜片爆香；5.加开水大火煮5分钟至汤色奶白（火候：大火）；6.下豆腐块转小火煮10分钟（火候：小火）；7.下丝瓜大火煮2分钟至变软；8.加盐1.5小勺调味，撒葱花出锅","ingredients":"鲫鱼1条、豆腐1块、丝瓜1根、姜4片、盐1.5小勺、料酒1勺、食用油2勺、炒锅/汤锅"},{"category":"home","month":"全年","stepTime":"浸泡15分钟、腌制20分钟、炖煮30分钟、收汁2分钟","name":"芋头排骨煲","type":"家常菜","prepTime":"腌制20分钟","steps":"1.排骨斩段冷水浸泡15分钟，加生抽1勺、蚝油1勺、料酒1勺、淀粉1勺、白糖1小勺腌20分钟；2.芋头去皮切块（戴手套）；3.砂锅中火热油下蒜末爆香（火候：中火）；4.下排骨大火翻炒至表面变色（火候：大火）；5.加开水没过排骨大火煮沸；6.转小火炖15分钟（火候：小火）；7.下芋头块继续小火炖15分钟至芋头软糯；8.加盐1小勺调味，大火收汁2分钟出锅","ingredients":"排骨300g、芋头300g、蒜末1勺、生抽1.5勺、蚝油1勺、白糖1小勺、盐1小勺、淀粉1勺、料酒1勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"腌制30分钟、蒸制30分钟、撕丝5分钟、熬葱油5分钟","name":"葱油手撕鸡","type":"家常菜","prepTime":"腌制30分钟","steps":"1.鸡处理干净内外抹盐和料酒腌30分钟；2.蒸锅大火烧开水（火候：大火）；3.鸡入锅大火蒸30分钟至熟（火候：大火）；4.取出放凉手撕成丝；5.葱切长段，姜切片；6.中火热油（油稍多）下葱段姜片花椒小火慢炸至葱焦黄出香（火候：小火）；7.滤出葱油；8.鸡丝加生抽2勺、香油1勺拌匀；9.淋入葱油拌匀","ingredients":"整鸡1只（约1kg）、葱100g、姜5片、生抽2勺、香油1勺、花椒少许、盐1小勺、蒸锅"},{"category":"home","month":"全年","stepTime":"腌制15分钟、蒸制8分钟","name":"干蒸牛肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉逆纹切薄片；2.加料酒1勺、生抽1.5勺、蚝油1勺、淀粉1.5勺、蒜末、盐少许、食用油1勺拌匀腌15分钟；3.蒸锅大火烧开水（火候：大火）；4.牛肉平铺在盘中；5.大火蒸8分钟（火候：大火）；6.出锅撒葱花，大火热油浇上激香（火候：大火）","ingredients":"牛肉200g、淀粉1.5勺、生抽1.5勺、蚝油1勺、蒜末1勺、葱花适量、料酒1勺、盐少许、食用油1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"泡发木耳1小时、焯水2分钟、滑炒虾仁2分钟、翻炒2分钟","name":"荷塘月色","type":"家常菜","prepTime":"泡发木耳1小时","steps":"1.木耳提前泡发1小时撕小朵；2.荷兰豆去筋，莲藕切片泡水防氧化，胡萝卜切片；3.虾仁开背加盐少许、淀粉半勺腌5分钟；4.沸水大火焯荷兰豆莲藕木耳胡萝卜各1分钟捞出过凉水（火候：大火）；5.中火热油下虾仁滑炒至变色盛出（火候：中火）；6.大火下蒜片爆香（火候：大火）；7.所有蔬菜大火翻炒1分钟；8.倒回虾仁，加盐1小勺和水淀粉勾薄芡翻炒均匀出锅","ingredients":"荷兰豆100g、莲藕1节、木耳50g、胡萝卜半根、虾仁100g、大蒜3瓣、盐1小勺、淀粉1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"泡发裙带菜10分钟、腌鱼10分钟、煎鱼5分钟、煮汤15分钟","name":"裙带菜鲫鱼豆腐汤","type":"家常菜","prepTime":"腌制10分钟","steps":"1.裙带菜温水泡发10分钟；2.鲫鱼处理干净两面划刀，加料酒半勺、盐少许腌10分钟擦干水分；3.豆腐切块；4.大火热油下鲫鱼大火煎至两面金黄（火候：大火），每面约2分钟；5.下姜片爆香；6.加开水大火煮5分钟至汤色奶白（火候：大火）；7.下豆腐和裙带菜转小火煮10分钟（火候：小火）；8.加盐1.5小勺调味，撒葱花出锅","ingredients":"鲫鱼1条、豆腐1块、裙带菜10g、姜4片、葱1根、盐1.5小勺、料酒1勺、食用油2勺、炒锅/汤锅"},{"category":"home","month":"全年","stepTime":"浸泡15分钟、泡话梅10分钟、焯水5分钟、炖煮30分钟、收汁2分钟","name":"话梅排骨年糕","type":"家常菜","prepTime":"浸泡15分钟","steps":"1.排骨斩段冷水浸泡15分钟；2.冷水下锅大火焯水加姜片料酒捞出（火候：大火）；3.话梅用温水泡10分钟；4.中火热油下冰糖小火炒糖色至棕红冒泡（火候：小火）；5.下排骨大火翻炒上色（火候：大火）；6.加料酒1勺、生抽1.5勺、老抽1勺、话梅和泡话梅水；7.加开水没过排骨大火煮沸；8.转小火炖25分钟（火候：小火）；9.下年糕继续小火炖5分钟至年糕软糯；10.加盐半小勺，大火收汁2分钟出锅","ingredients":"排骨200g、年糕150g、话梅5颗、生抽1.5勺、老抽1勺、冰糖15g、料酒1勺、盐半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌萝卜15分钟、煎制8分钟","name":"潮汕萝卜烙","type":"家常菜","prepTime":"腌制15分钟","steps":"1.白萝卜去皮切细丝，加盐半小勺腌15分钟出水挤干；2.花生炒熟擀碎，虾米泡软；3.萝卜丝加花生碎、虾米、淀粉50g、葱花、盐半小勺、白胡椒粉少许搅匀；4.平底锅中火热油（火候：中火）；5.将萝卜丝糊倒入摊平成圆形；6.中火煎至底面金黄翻面（火候：中火），每面约4分钟；7.煎至两面金黄酥脆出锅切块","ingredients":"白萝卜300g、花生30g、虾米20g、淀粉50g、葱花适量、盐1小勺、白胡椒粉少许、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"泡米粉20分钟、腌制15分钟、蒸制10分钟","name":"榨菜牛肉蒸米粉","type":"家常菜","prepTime":"泡米粉20分钟","steps":"1.米粉温水泡发20分钟沥干铺在盘底；2.牛肉逆纹切薄片加料酒1勺、生抽1勺、蚝油1勺、淀粉1勺、食用油1勺腌15分钟；3.榨菜切丝；4.将牛肉片和榨菜丝铺在米粉上；5.蒸锅大火烧开水（火候：大火）；6.大火蒸10分钟（火候：大火）；7.出锅淋生抽半勺，撒葱花即可","ingredients":"米粉200g、牛肉150g、榨菜50g、生抽1.5勺、蚝油1勺、淀粉1勺、料酒1勺、食用油1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"备菜3分钟、煸油渣2分钟、炒制1分钟","name":"猪油渣炒菜心","type":"家常菜","prepTime":"无","steps":"1.菜心洗净切段，粗梗对半切开；2.蒜切末；3.大火热锅下猪油渣小火煸出油（火候：小火）；4.下蒜末大火爆香（火候：大火）；5.先下菜梗大火翻炒30秒；6.再下菜叶大火翻炒30秒；7.加鱼露1勺、盐少许调味出锅","ingredients":"猪油渣50g、菜心300g、大蒜3瓣、盐1小勺、鱼露1勺、炒锅"},{"category":"home","month":"全年","stepTime":"洗虾3分钟、煮虾3分钟、过冰水1分钟","name":"白灼罗氏虾","type":"家常菜","prepTime":"无","steps":"1.罗氏虾剪须洗净；2.汤锅大火烧开水加姜片葱段料酒（火候：大火）；3.水沸腾后下虾大火煮至虾身变红弯曲（火候：大火），约2-3分钟；4.立即捞出过冰水（使虾肉更弹牙）；5.调蘸料：生抽2勺、醋1勺、蒜末1勺、小米辣切圈搅匀；6.虾摆盘蘸食","ingredients":"罗氏虾300g、姜4片、葱2根、料酒1勺、蘸料（生抽2勺+醋1勺+蒜末1勺+小米辣可选）、汤锅"},{"category":"home","month":"全年","stepTime":"腌制1小时、电饭煲两次煮饭程序约40分钟","name":"酱油手撕鸡","type":"家常菜","prepTime":"腌制1小时","steps":"1.鸡处理干净，用牙签扎孔方便入味；2.加生抽3勺、老抽1勺、蚝油1勺、料酒1勺、姜片葱段内外抹匀腌1小时；3.电饭煲底铺姜片葱段；4.放入鸡和腌料汁；5.按煮饭键；6.跳闸后翻面再按一次煮饭键；7.取出放凉手撕成丝；8.淋上锅底汤汁","ingredients":"整鸡1只（约1kg）、生抽3勺、老抽1勺、蚝油1勺、姜5片、葱2根、料酒1勺、电饭煲"},{"category":"home","month":"全年","stepTime":"备菜3分钟、炒制2分钟","name":"咸菜炒豆芽","type":"家常菜","prepTime":"无","steps":"1.豆芽洗净沥干；2.咸菜切细丝，洗一遍挤干水分；3.大火热猪油和食用油（火候：大火）；4.下咸菜丝大火翻炒1分钟炒出香味；5.下豆芽大火快速翻炒（火候：大火）；6.豆芽变软后加盐少许（咸菜有咸味注意减盐）；7.大火翻炒30秒出锅","ingredients":"豆芽200g、潮汕咸菜100g、猪油1勺、盐少许、食用油1勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌制15分钟、煎制8分钟","name":"水煎脆皮五花肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.五花肉切约0.5cm厚片；2.加盐半小勺、黑胡椒少许腌15分钟；3.平底锅不放油，中火加热（火候：中火）；4.五花肉片平铺，中火煎至出油底面金黄（火候：中火），约4分钟；5.翻面继续煎4分钟至两面焦脆；6.期间用厨房纸吸去多余油脂；7.煎至两面金黄酥脆出锅","ingredients":"五花肉300g、盐半小勺、黑胡椒少许、食用油少许、平底锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、炒蛋1分钟、滑炒牛肉2分钟、炒番茄2分钟、汇合1分钟","name":"番茄鸡蛋炒牛肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉逆纹切片加料酒1勺、生抽1勺、淀粉1勺、盐少许腌15分钟；2.番茄切块，鸡蛋打散加盐少许搅匀；3.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）；4.中火热油下牛肉大火滑炒至变色盛出（火候：大火）；5.留底油下番茄块大火炒软出汁，加白糖半小勺（火候：大火）；6.倒回牛肉和鸡蛋，加生抽半勺、盐半小勺大火翻炒30秒；7.撒葱花出锅","ingredients":"牛肉150g、番茄2个、鸡蛋2个、葱适量、生抽1.5勺、料酒1勺、盐1小勺、白糖半小勺、淀粉1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"吐沙2小时、煎虾2分钟、煮制5分钟","name":"菌菇海鲜煲","type":"家常菜","prepTime":"吐沙2小时","steps":"1.花甲放盐水吐沙2小时；2.虾开背去虾线，菌菇洗净，豆腐切块；3.中火热油下姜片爆香（火候：中火）；4.下虾中火煎至变红盛出；5.砂锅加开水大火煮沸（火候：大火）；6.下菌菇豆腐大火煮3分钟；7.下花甲和虾大火煮至花甲开口（火候：大火），约2分钟；8.加生抽1勺、盐1小勺调味出锅","ingredients":"鲜虾150g、花甲200g、菌菇200g、豆腐1块、姜4片、生抽1勺、盐1小勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"备菜3分钟、炒制1分钟","name":"炒小白菜","type":"家常菜","prepTime":"无","steps":"1.小白菜洗净切段，沥干水分；2.蒜切末；3.大火热油至冒烟（火候：大火）；4.下蒜末大火爆香10秒；5.立即下小白菜大火快速翻炒（火候：大火）；6.菜变软后加盐1小勺翻炒均匀；7.全程大火约1分钟出锅","ingredients":"小白菜300g、大蒜3瓣、盐1小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"剥板栗15分钟、腌制30分钟、蒸制25分钟","name":"板栗蒸鸡","type":"家常菜","prepTime":"剥板栗15分钟+腌制30分钟","steps":"1.板栗去壳去皮（沸水煮3分钟更好剥）；2.鸡切块加料酒1勺、生抽1.5勺、蚝油1勺、淀粉1勺、白糖半小勺、食用油1勺、姜片拌匀腌30分钟；3.和板栗混合拌匀；4.蒸锅大火烧开水（火候：大火）；5.装盘大火蒸25分钟（火候：大火）；6.出锅撒葱花","ingredients":"鸡半只、板栗200g、姜3片、葱1根、生抽1.5勺、蚝油1勺、淀粉1勺、料酒1勺、白糖半小勺、食用油1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、滑炒2分钟、炒番茄2分钟、焖蛋1分钟","name":"番茄牛肉滑蛋","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉逆纹切片加料酒1勺、生抽1勺、淀粉1勺、盐少许腌15分钟；2.番茄切块，鸡蛋打散加盐少许搅匀；3.中火热油下牛肉大火滑炒至变色盛出（火候：大火）；4.留底油下番茄块大火炒软出汁，加白糖半小勺（火候：大火）；5.加半碗水大火煮沸；6.将牛肉片滑入番茄汤中；7.均匀淋入蛋液，转小火盖盖焖1分钟至蛋液凝固（火候：小火）；8.撒葱花出锅","ingredients":"牛肉150g、番茄2个、鸡蛋3个、葱适量、生抽1勺、料酒1勺、盐1小勺、白糖半小勺、淀粉1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"泡发30分钟、浸泡20分钟、焯水5分钟、炖煮55分钟","name":"苹果羊肚菌排骨汤","type":"家常菜","prepTime":"泡发30分钟","steps":"1.羊肚菌温水泡发30分钟洗净泥沙；2.排骨冷水浸泡20分钟去血水；3.冷水下锅大火焯水加姜2片捞出（火候：大火）；4.苹果去皮去核切块；5.砂锅大火烧开水（火候：大火）；6.下排骨姜片红枣大火煮沸；7.转小火炖40分钟（火候：小火）；8.下羊肚菌和苹果块继续小火炖15分钟；9.加盐1.5小勺调味出锅","ingredients":"排骨300g、苹果1个、羊肚菌8个、红枣8颗、姜4片、盐1.5小勺、砂锅"},{"category":"home","month":"全年","stepTime":"泡粉丝20分钟、炒蛋黄3分钟、煲制3分钟","name":"海黄粉丝煲","type":"家常菜","prepTime":"泡粉丝20分钟","steps":"1.粉丝温水泡软20分钟；2.咸蛋黄蒸熟压碎成泥；3.虾仁加盐少许腌5分钟；4.中火热油下咸蛋黄泥小火炒至起沙冒泡（火候：小火）；5.下蒜末虾仁翻炒；6.下粉丝，加生抽1勺、蚝油1勺翻拌均匀；7.转入砂锅小火煲3分钟入味（火候：小火）；8.撒葱花出锅","ingredients":"粉丝1把、虾仁100g、咸蛋黄3个、蒜末1勺、生抽1勺、蚝油1勺、葱花适量、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"焯芥兰1分钟、炒制1分钟","name":"猪油炒芥兰","type":"家常菜","prepTime":"无","steps":"1.芥兰切段，粗梗对半切开；2.沸水大火加盐和油几滴，焯芥兰梗30秒再下叶子焯15秒捞出过凉水（火候：大火）；3.蒜切末；4.大火热猪油（火候：大火）；5.下蒜末大火爆香；6.下芥兰大火快速翻炒（火候：大火）；7.加鱼露1勺、盐少许调味；8.翻炒30秒出锅","ingredients":"芥兰300g、猪油1.5勺、大蒜3瓣、鱼露1勺、盐少许、炒锅"},{"category":"home","month":"全年","stepTime":"备料2分钟","name":"百香果青柠蜂蜜水","type":"家常菜","prepTime":"无","steps":"1.百香果切开取果肉；2.青柠切片去籽；3.杯中加入百香果肉、青柠片、蜂蜜2勺；4.加凉白开或气泡水300ml搅匀；5.加冰块即可","ingredients":"百香果2个、青柠1个、蜂蜜2勺、冰块适量、水300ml、搅拌杯"},{"category":"home","month":"全年","stepTime":"腌制1小时、电饭煲两次煮饭程序约40分钟","name":"电饭煲葱油窑鸡腿","type":"家常菜","prepTime":"腌制1小时","steps":"1.鸡腿用牙签扎孔，加生抽2勺、蚝油1勺、料酒1勺抓匀腌1小时；2.电饭煲底铺满葱段姜片；3.放入腌好的鸡腿，淋入腌料汁和食用油1勺；4.按煮饭键；5.跳闸后翻面再按一次煮饭键；6.取出即可，锅中汤汁可淋在鸡腿上","ingredients":"鸡腿4个、葱50g、姜5片、生抽2勺、蚝油1勺、料酒1勺、食用油1勺、电饭煲"},{"category":"home","month":"全年","stepTime":"腌肉15分钟、腌萝卜10分钟、滑炒2分钟、翻炒2分钟","name":"萝卜丝炒牛肉","type":"家常菜","prepTime":"腌制15分钟","steps":"1.牛肉逆纹切丝加料酒1勺、生抽1勺、淀粉1勺、盐少许腌15分钟；2.白萝卜去皮切细丝，加盐少许腌10分钟出水挤干；3.中火热油下牛肉丝大火滑炒至变色盛出（火候：大火）；4.留底油下小米辣大火爆香（火候：大火）；5.下萝卜丝大火翻炒1分钟至变软；6.倒回牛肉丝，加生抽半勺、盐半小勺大火翻炒30秒出锅","ingredients":"牛肉150g、白萝卜半根、小米辣2个、生抽1.5勺、料酒1勺、淀粉1勺、盐1小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌虾10分钟、煎口蘑虾仁3分钟、滑蛋2分钟","name":"黑松露口蘑虾仁滑蛋","type":"家常菜","prepTime":"腌制10分钟","steps":"1.虾仁开背去虾线加料酒1勺、盐少许、淀粉1勺腌10分钟；2.口蘑切片，鸡蛋打散加盐少许搅匀；3.中火融化黄油（火候：中火）；4.下口蘑片煎至出汁微焦（火候：中火），约2分钟；5.下虾仁煎至变色；6.均匀淋入蛋液；7.转小火待底部凝固轻轻推动（火候：小火）；8.蛋液基本凝固加黑松露酱1勺拌匀出锅","ingredients":"虾仁150g、口蘑100g、黑松露酱1勺、鸡蛋3个、盐1小勺、淀粉1勺、料酒1勺、黄油20g、平底锅"},{"category":"home","month":"全年","stepTime":"剥板栗15分钟、浸泡15分钟、焯水5分钟、蒸南瓜5分钟、炖煮50分钟","name":"金汤板栗排骨","type":"家常菜","prepTime":"剥板栗15分钟","steps":"1.排骨斩段冷水浸泡15分钟去血水，冷水下锅大火焯水捞出（火候：大火）；2.板栗去壳去皮；3.南瓜去皮切片蒸熟压成泥；4.砂锅大火烧开水（火候：大火）；5.下排骨姜片料酒大火煮沸转小火炖30分钟（火候：小火）；6.下板栗继续小火炖15分钟；7.倒入南瓜泥搅匀使汤色金黄；8.继续小火炖5分钟；9.加盐1.5小勺、生抽1勺调味出锅","ingredients":"排骨300g、板栗150g、南瓜200g、盐1.5小勺、生抽1勺、料酒1勺、姜4片、砂锅"},{"category":"home","month":"全年","stepTime":"煎鱼4分钟、焖煮3分钟","name":"潮汕半煎煮红杉鱼","type":"家常菜","prepTime":"无","steps":"1.鱼处理干净两面划刀，擦干水分；2.中火热油下鱼中火煎至一面金黄翻面（火候：中火），每面约2分钟；3.下姜片爆香；4.加普宁豆酱1.5勺和小半碗水；5.盖盖中火焖煮3分钟（火候：中火）；6.开盖撒葱段，大火收汁30秒出锅（火候：大火）","ingredients":"红杉鱼2条、普宁豆酱1.5勺、姜3片、葱1根、食用油2勺、平底锅/炒锅"},{"category":"home","month":"全年","stepTime":"焯荷兰豆1分钟、煸油渣2分钟、翻炒1分钟","name":"猪油渣炒荷兰豆","type":"家常菜","prepTime":"无","steps":"1.荷兰豆去筋洗净；2.沸水大火焯荷兰豆30秒捞出过凉水（火候：大火）；3.大火热锅下猪油渣小火煸出油（火候：小火）；4.下蒜末大火爆香（火候：大火）；5.下荷兰豆大火翻炒1分钟；6.加盐半小勺调味出锅","ingredients":"荷兰豆200g、猪油渣50g、蒜末1勺、盐半小勺、食用油1勺、炒锅"},{"category":"home","month":"全年","stepTime":"吐沙2小时、焖蛏子2分钟、炒丝瓜2分钟","name":"丝瓜炒蛏子","type":"家常菜","prepTime":"吐沙2小时","steps":"1.蛏子放盐水吐沙2小时；2.丝瓜去皮切滚刀块；3.大火热油下姜丝蒜末大火爆香（火候：大火）；4.下蛏子大火翻炒，加料酒1勺；5.盖盖大火焖至蛏子开口（火候：大火），约2分钟；6.下丝瓜块大火翻炒至变软出汁（火候：大火）；7.加盐1小勺调味出锅","ingredients":"丝瓜1根、蛏子300g、姜丝适量、蒜末1勺、盐1小勺、料酒1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌肉20分钟、炒酸菜3分钟、煮肉片2分钟","name":"酸菜滑肉","type":"家常菜","prepTime":"腌制20分钟","steps":"1.肉切薄片加料酒1勺、盐少许、蛋清1个、淀粉2勺抓匀腌20分钟；2.酸菜切丝洗两遍挤干；3.中火热油下姜片泡椒酸菜大火翻炒2分钟出酸味（火候：大火）；4.加开水大火煮沸（火候：大火）；5.将肉片逐片滑入汤中，小火煮2分钟至肉片变白（火候：小火）；6.加生抽1勺、盐半小勺、白胡椒粉少许调味；7.水淀粉勾薄芡出锅","ingredients":"猪里脊肉200g、酸菜150g、淀粉3勺、鸡蛋清1个、姜3片、泡椒2个、料酒1勺、生抽1勺、盐1小勺、白胡椒粉少许、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"酿青椒10分钟、煎制5分钟、焖制2分钟","name":"青椒酿虾滑","type":"家常菜","prepTime":"无","steps":"1.青椒去籽对半切开；2.虾滑加生抽半勺、蚝油半勺、淀粉1勺搅匀；3.将虾滑塞入青椒中填满抹平；4.平底锅中火热油（火候：中火）；5.虾滑面朝下中火煎至金黄（火候：中火），约3分钟；6.翻面煎青椒面2分钟；7.调碗汁：生抽半勺、蚝油半勺、白糖半小勺、水2勺、淀粉半勺搅匀；8.倒入碗汁小火焖2分钟至汤汁浓稠（火候：小火）；9.出锅装盘","ingredients":"青椒4个、虾滑200g、生抽1勺、蚝油1勺、淀粉1勺、白糖半小勺、食用油2勺、平底锅"},{"category":"home","month":"全年","stepTime":"泡发20分钟、浸泡15分钟、焯水5分钟、炖煮60分钟","name":"虫草花阿胶鸡汤","type":"家常菜","prepTime":"泡发20分钟","steps":"1.虫草花温水泡发20分钟；2.鸡切块冷水浸泡15分钟去血水；3.冷水下锅大火焯水加姜2片捞出（火候：大火）；4.砂锅大火烧开水（火候：大火）；5.下鸡块姜片红枣大火煮沸；6.转小火炖50分钟（火候：小火）；7.下虫草花枸杞和敲碎的阿胶继续小火炖10分钟至阿胶融化；8.加盐1.5小勺调味出锅","ingredients":"鸡半只、虫草花20g、阿胶15g、红枣8颗、枸杞少许、姜4片、盐1.5小勺、砂锅"},{"category":"home","month":"全年","stepTime":"炒肉沫3分钟、打蛋1分钟、蒸制12分钟","name":"肉沫蒸蛋","type":"家常菜","prepTime":"无","steps":"1.肉沫加生抽半勺、料酒半勺、盐少许中火炒熟盛出（火候：中火）；2.鸡蛋打散加温水（蛋液：温水≈1：1.5）和盐少许搅匀；3.蛋液过筛去泡沫；4.炒好的肉沫铺碗底；5.倒入蛋液盖保鲜膜扎小孔；6.蒸锅大火烧开水（火候：大火）；7.大火蒸12分钟至蛋液凝固（火候：大火）；8.出锅淋生抽半勺、撒葱花","ingredients":"猪肉沫100g、鸡蛋3个、温水200ml、生抽1勺、盐半小勺、葱花适量、蒸锅"},{"category":"home","month":"全年","stepTime":"泡土豆丝10分钟、腌肉15分钟、滑炒2分钟、炒土豆丝3分钟、汇合1分钟","name":"土豆丝炒肉丝","type":"家常菜","prepTime":"腌制15分钟","steps":"1.土豆去皮切细丝泡水10分钟去淀粉，沥干；2.肉丝加料酒1勺、生抽半勺、淀粉1勺、盐少许腌15分钟；3.中火热油下肉丝大火滑炒至变色盛出（火候：大火）；4.大火热油下土豆丝大火快速翻炒（火候：大火）；5.炒至土豆丝变透明加醋半勺翻炒；6.倒回肉丝和青椒丝，加生抽半勺、盐半小勺大火翻炒30秒出锅","ingredients":"土豆2个、猪肉丝150g、青椒丝少许、生抽1勺、料酒1勺、盐1小勺、醋半勺、淀粉1勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"腌制20分钟、蒸制30分钟","name":"无水冬瓜桑拿鸡","type":"家常菜","prepTime":"腌制20分钟","steps":"1.鸡切块加料酒1勺、生抽1勺、盐半小勺、姜3片腌20分钟；2.冬瓜去皮切厚片铺在蒸盘底部；3.腌好的鸡块铺在冬瓜上；4.蒸锅大火烧开水（火候：大火）；5.入锅大火蒸30分钟至鸡肉熟透（火候：大火）；6.蒸的过程中冬瓜会出水形成汤汁；7.出锅撒葱花即可","ingredients":"鸡半只、冬瓜300g、姜5片、葱2根、料酒1勺、生抽1勺、盐1小勺、蒸锅"},{"category":"home","month":"全年","stepTime":"煮牛肉30分钟、放凉15分钟、拌制2分钟","name":"菠萝香菜拌牛肉","type":"家常菜","prepTime":"煮牛肉30分钟","steps":"1.牛肉整块冷水下锅加姜片料酒，大火煮沸撇浮沫转小火煮30分钟至熟（火候：大火→小火）；2.捞出放凉切薄片；3.菠萝切块用盐水泡10分钟；4.香菜切段，小米辣切圈；5.调酱汁：生抽1.5勺、醋1勺、白糖半小勺、香油1勺、盐少许、小米辣搅匀；6.牛肉片+菠萝+香菜+酱汁拌匀即可","ingredients":"牛肉200g、菠萝半个、香菜适量、小米辣2个、生抽1.5勺、醋1勺、白糖半小勺、香油1勺、盐少许、炒锅"},{"category":"home","month":"全年","stepTime":"煎豆腐5分钟、煸肉5分钟、煲制8分钟","name":"五花肉豆腐生蚝煲","type":"家常菜","prepTime":"无","steps":"1.五花肉切薄片，豆腐切厚块，生蚝处理干净；2.中火热油下豆腐块中火煎至两面金黄盛出（火候：中火）；3.留底油下五花肉煸炒出油至微焦（火候：中火）；4.下蒜末爆香；5.砂锅底铺五花肉和豆腐；6.加生抽1.5勺、蚝油1勺、盐半小勺和少量水；7.大火煮沸转小火煲5分钟（火候：小火）；8.下生蚝继续小火煲3分钟至生蚝刚熟；9.撒葱花出锅","ingredients":"五花肉150g、老豆腐1块、生蚝200g、蒜末1勺、生抽1.5勺、蚝油1勺、盐半小勺、食用油2勺、砂锅"},{"category":"home","month":"全年","stepTime":"泡发1小时、浸泡20分钟、焯水5分钟、炖煮65分钟","name":"四神排骨汤","type":"家常菜","prepTime":"泡发1小时","steps":"1.茯苓莲子芡实提前泡发1小时；2.排骨冷水浸泡20分钟去血水；3.冷水下锅大火焯水加姜2片捞出（火候：大火）；4.山药去皮切滚刀块（戴手套）；5.砂锅大火烧开水（火候：大火）；6.下排骨姜片药材大火煮沸；7.转小火炖50分钟（火候：小火）；8.下山药继续小火炖15分钟；9.加盐1.5小勺调味出锅","ingredients":"排骨300g、山药100g、茯苓15g、莲子20g、芡实15g、姜4片、盐1.5小勺、砂锅"},{"category":"home","month":"全年","stepTime":"泡发20分钟、焯鱼面1分钟、炒制3分钟","name":"潮汕鱼面炒豆芽","type":"家常菜","prepTime":"泡发20分钟","steps":"1.鱼面温水泡发20分钟；2.豆芽洗净沥干；3.沸水大火焯鱼面1分钟捞出（火候：大火）；4.大火热油下葱段大火爆香（火候：大火）；5.下胡萝卜丝大火翻炒30秒；6.下豆芽大火翻炒30秒；7.下鱼面，加生抽1勺、盐1小勺大火翻炒1分钟出锅","ingredients":"潮汕鱼面200g、豆芽100g、胡萝卜丝少许、葱段适量、生抽1勺、盐1小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"泡粉丝20分钟、腌茄子10分钟、煎茄子5分钟、炒料5分钟、煲制5分钟","name":"肉沫茄子粉丝煲","type":"家常菜","prepTime":"泡粉丝20分钟","steps":"1.粉丝温水泡软20分钟；2.茄子切条加盐半小勺腌10分钟出水挤干；3.中火热油（油多）下茄子条中火煎软盛出（火候：中火）；4.留底油下肉沫中火炒散至变色；5.下蒜末豆瓣酱小火炒出红油（火候：小火）；6.砂锅底铺粉丝，放茄子条和肉沫；7.加生抽1.5勺、蚝油1勺、盐少许和少量水；8.大火煮沸转小火煲5分钟（火候：小火）；9.撒葱花出锅","ingredients":"茄子2根、肉沫100g、粉丝1把、蒜末1勺、生抽1.5勺、蚝油1勺、豆瓣酱半勺、盐少许、食用油3勺、砂锅"},{"category":"home","month":"全年","stepTime":"吐沙2小时、腌鱼10分钟、煎鱼3分钟、焖制3分钟","name":"鲈鱼焖花甲","type":"家常菜","prepTime":"吐沙2小时","steps":"1.鲈鱼处理干净切段，加料酒半勺、盐少许腌10分钟；2.花甲放盐水吐沙2小时；3.中火热油下姜片爆香（火候：中火）；4.下鲈鱼段中火煎至两面微黄（火候：中火），约3分钟；5.下花甲大火翻炒，加料酒半勺、生抽1.5勺、蚝油1勺；6.盖盖大火焖至花甲全部开口（火候：大火），约3分钟；7.开盖大火收汁，撒葱段出锅","ingredients":"鲈鱼1条、花甲300g、姜5片、葱2根、生抽1.5勺、蚝油1勺、料酒1勺、盐半小勺、食用油2勺、炒锅/砂锅"},{"category":"home","month":"全年","stepTime":"泡发30分钟、腌制30分钟、蒸制20分钟","name":"香菇虫草花蒸滑鸡","type":"家常菜","prepTime":"泡发30分钟","steps":"1.香菇和虫草花温水泡发30分钟，香菇切片；2.鸡切块加料酒1勺、生抽1.5勺、蚝油1勺、淀粉1勺、白糖半小勺、食用油1勺、姜丝拌匀腌30分钟；3.加入香菇和虫草花拌匀；4.蒸锅大火烧开水（火候：大火）；5.装盘大火蒸20分钟（火候：大火）；6.出锅撒葱花即可","ingredients":"鸡半只、干香菇6朵、虫草花20g、姜丝适量、生抽1.5勺、蚝油1勺、淀粉1勺、料酒1勺、白糖半小勺、食用油1勺、蒸锅"},{"category":"home","month":"全年","stepTime":"煎蛋4分钟、煮汁1分钟","name":"糖醋荷包蛋","type":"家常菜","prepTime":"无","steps":"1.中火热油逐一打入鸡蛋，中火煎至底面金黄翻面（火候：中火），每面约1分钟，煎成荷包蛋盛出；2.调糖醋汁：番茄酱2勺、白糖1勺、白醋1勺、生抽半勺、盐少许、水3勺搅匀；3.留底油小火倒入糖醋汁煮至冒泡变稠（火候：小火）；4.下荷包蛋小火翻拌均匀裹上酱汁；5.撒葱花出锅","ingredients":"鸡蛋4个、番茄酱2勺、白糖1勺、白醋1勺、生抽半勺、盐少许、葱花适量、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"备菜3分钟、炒制3分钟","name":"手撕包菜","type":"家常菜","prepTime":"无","steps":"1.包菜手撕成小片，洗净沥干水分；2.中火热油下花椒干辣椒小火炸香后捞出（火候：小火）；3.下蒜末大火爆香（火候：大火）；4.下包菜大火快速翻炒至变软（火候：大火），约2分钟；5.沿锅边淋入醋1勺激出香味；6.加生抽1勺、盐半小勺大火翻炒30秒出锅","ingredients":"包菜半颗、干辣椒3个、花椒少许、蒜末1勺、生抽1勺、醋1勺、盐半小勺、食用油2勺、炒锅"},{"category":"home","month":"全年","stepTime":"备菜3分钟、煮丸3分钟、煮菜1分钟","name":"牛肉丸西洋菜汤","type":"家常菜","prepTime":"无","steps":"1.西洋菜洗净摘段；2.汤锅大火烧开水（火候：大火）；3.下姜片和牛肉丸大火煮沸煮3分钟至丸子浮起；4.下西洋菜大火煮1分钟至变软；5.加盐1小勺调味；6.关火淋蒜头油1小勺增香出锅","ingredients":"牛肉丸200g、西洋菜150g、姜3片、盐1小勺、蒜头油1小勺、汤锅"},{"category":"home","month":"全年","stepTime":"腌制1小时、焗制40分钟、焖5分钟","name":"无水焗鸡","type":"家常菜","prepTime":"腌制1小时","steps":"1.鸡处理干净内外抹盐1.5小勺和料酒2勺腌1小时；2.砂锅底铺满姜片和葱段；3.放入腌好的鸡，淋生抽2勺；4.盖盖大火烧至锅边冒汽（火候：大火），约3分钟；5.转小火焗40分钟至鸡肉熟透（火候：小火），中途不加水不开盖；6.关火焖5分钟；7.取出斩块，锅底汤汁淋在鸡上","ingredients":"整鸡1只（约1kg）、姜8片、葱50g、盐1.5小勺、料酒2勺、生抽2勺、砂锅"},{"category":"home","month":"全年","stepTime":"备料20分钟、炸制5分钟","name":"虾枣","type":"家常菜","prepTime":"备料20分钟","steps":"1.虾仁剁成虾泥，肥肉切细丁，马蹄去皮切碎；2.虾泥加肥肉丁、马蹄碎、鸡蛋、淀粉3勺、盐1小勺、白胡椒粉半小勺顺一个方向搅打上劲；3.手蘸水将虾泥搓成枣形圆球；4.锅中倒油中火烧至六成热（筷子冒泡）；5.下虾枣中火炸至浮起金黄（火候：中火），约4分钟；6.捞出大火复炸30秒至外酥里嫩（火候：大火）；7.控油装盘，可蘸甜辣酱食用","ingredients":"虾仁200g、猪肥肉50g、马蹄5个、鸡蛋1个、淀粉3勺、盐1小勺、白胡椒粉半小勺、食用油适量、炸锅"}],"seasonal":[{"category":"seasonal","month":"1月","stepTime":"煮腊肉10分钟\n焯笋2分钟\n煸炒5分钟\n翻炒3分钟","name":"冬笋炒腊肉","type":"当季菜(冬季)","prepTime":"无","steps":"1.腊肉冷水下锅大火煮10分钟去咸，捞出切薄片（火候：大火）\n2.冬笋剥壳切片，沸水焯2分钟捞出\n3.中火热油爆香姜蒜干辣椒（火候：中火）\n4.下腊肉片中火煸炒出油至微卷（火候：中火）\n5.下冬笋片大火翻炒2分钟\n6.加生抽1勺、料酒1勺、白糖半小勺、盐少许调味\n7.撒蒜苗段大火翻炒30秒出锅","ingredients":"冬笋200g\n腊肉150g\n蒜苗2根\n干辣椒3个\n姜3片\n蒜2瓣\n生抽1勺\n料酒1勺\n盐少许\n白糖半小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"1月","stepTime":"浸泡30分钟\n焯水5分钟\n炒香5分钟\n炖煮80分钟\n收汁3分钟","name":"红烧羊肉煲","type":"当季菜(冬季)","prepTime":"浸泡30分钟","steps":"1.羊腩切块冷水浸泡30分钟去血水\n2.冷水下锅大火焯水，加姜3片料酒1勺，撇浮沫捞出（火候：大火）\n3.中火热油下姜片葱段八角桂皮香叶炒香（火候：中火）\n4.下羊肉大火翻炒至表面微焦\n5.加料酒1勺、生抽2勺、老抽1勺、冰糖翻炒上色\n6.加开水没过羊肉，大火煮沸转小火炖1小时（火候：小火）\n7.萝卜切滚刀块入锅继续炖20分钟\n8.加盐1小勺调味，大火收汁3分钟出锅","ingredients":"羊腩500g\n白萝卜1根\n姜5片\n葱2根\n八角2颗\n桂皮1段\n香叶2片\n料酒2勺\n生抽2勺\n老抽1勺\n冰糖15g\n盐1小勺\n食用油2勺\n砂锅"},{"category":"seasonal","month":"1月","stepTime":"泡粉条30分钟\n煸肉5分钟\n炒白菜3分钟\n炖煮10分钟\n收汁1分钟","name":"白菜炖粉条","type":"当季菜(冬季)","prepTime":"泡粉条30分钟","steps":"1.粉条温水泡软30分钟\n2.五花肉切薄片\n3.白菜手撕成块\n4.中火热油下五花肉煸炒出油至微焦（火候：中火）\n5.下姜蒜干辣椒爆香\n6.下白菜大火翻炒至软（火候：大火）\n7.加生抽2勺、老抽半勺翻炒上色\n8.加开水没过食材，大火煮沸\n9.下粉条转小火炖10分钟（火候：小火）\n10.加盐1小勺调味，大火收汁1分钟出锅","ingredients":"大白菜半颗\n红薯粉条100g\n五花肉150g\n姜3片\n蒜3瓣\n干辣椒2个\n生抽2勺\n老抽半勺\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"1月","stepTime":"备菜5分钟\n调汁2分钟\n炒制3分钟","name":"醋溜白菜","type":"当季菜(冬季)","prepTime":"无","steps":"1.白菜帮和叶分开，帮斜切成片，叶手撕成块\n2.调碗汁：生抽1勺、醋2勺、白糖1小勺、盐半小勺、淀粉1勺、水3勺搅匀\n3.中火热油下花椒干辣椒小火炸香后捞出（火候：小火）\n4.下姜蒜末大火爆香（火候：大火）\n5.先下白菜帮大火翻炒1分钟至变软\n6.再下白菜叶大火翻炒30秒\n7.沿锅边淋入碗汁大火快速翻炒均匀\n8.汤汁浓稠裹住白菜即可出锅（火候：大火）","ingredients":"大白菜半颗\n干辣椒3个\n花椒少许\n蒜3瓣\n姜2片\n生抽1勺\n醋2勺\n白糖1小勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"1月","stepTime":"腌鱼10分钟\n煎鱼5分钟\n煮汤15分钟","name":"萝卜丝鲫鱼汤","type":"当季菜(冬季)","prepTime":"腌制10分钟","steps":"1.鲫鱼处理干净两面划刀，加料酒半勺、盐少许腌10分钟，擦干水分\n2.白萝卜去皮切细丝\n3.大火热油下鲫鱼大火煎至两面金黄（火候：大火），每面约2分钟\n4.下姜片爆香\n5.加开水（一定要开水）没过鱼身大火煮沸（火候：大火）\n6.大火煮5分钟至汤色奶白\n7.下萝卜丝转小火煮10分钟至萝卜丝变软（火候：小火）\n8.加盐1.5小勺、白胡椒粉少许调味\n9.撒葱花出锅","ingredients":"鲫鱼1条（约300g）\n白萝卜半根\n姜4片\n葱1根\n盐1.5小勺\n料酒1勺\n白胡椒粉少许\n食用油2勺\n汤锅"},{"category":"seasonal","month":"1月","stepTime":"泡粉丝15分钟\n焯菠菜1分钟\n焯粉丝1分钟\n拌制2分钟","name":"菠菜拌粉丝","type":"当季菜(冬季)","prepTime":"泡粉丝15分钟","steps":"1.粉丝温水泡软15分钟\n2.菠菜洗净，沸水大火焯30秒捞出过凉水（火候：大火），挤干切段\n3.粉丝沸水大火焯1分钟捞出过凉水（火候：大火）\n4.蒜切末\n5.调酱汁：生抽1勺、醋1勺、香油1勺、盐半小勺、白糖半小勺、蒜末搅匀\n6.菠菜和粉丝混合，倒入酱汁拌匀\n7.撒白芝麻即可","ingredients":"菠菜200g\n粉丝1把\n蒜3瓣\n生抽1勺\n醋1勺\n香油1勺\n盐半小勺\n白糖半小勺\n白芝麻少许\n炒锅"},{"category":"seasonal","month":"1月","stepTime":"浸泡20分钟\n焯水5分钟\n炖煮52分钟","name":"山药炖排骨","type":"当季菜(冬季)","prepTime":"浸泡20分钟","steps":"1.排骨冷水浸泡20分钟去血水\n2.冷水下锅大火焯水加姜2片料酒半勺，撇浮沫捞出（火候：大火）\n3.山药去皮切滚刀块（戴手套），胡萝卜切滚刀块\n4.砂锅大火烧开水（火候：大火）\n5.下排骨姜片大火煮沸转小火炖35分钟（火候：小火）\n6.下山药和胡萝卜继续小火炖15分钟至山药软糯\n7.加盐1.5小勺、枸杞，再炖2分钟\n8.撒葱花出锅","ingredients":"排骨300g\n山药200g\n胡萝卜1根\n姜4片\n葱1根\n料酒1勺\n盐1.5小勺\n枸杞少许\n砂锅"},{"category":"seasonal","month":"2月","stepTime":"腌萝卜10分钟\n炒料5分钟\n蒸40分钟\n煎制5分钟","name":"萝卜糕","type":"当季菜(冬季)","prepTime":"泡发香菇虾米30分钟","steps":"1.萝卜去皮刨丝，加盐半小勺腌10分钟挤干水分\n2.腊肠切丁、香菇泡发切丁、虾米泡软\n3.中火热油炒香腊肠虾米香菇（火候：中火）\n4.粘米粉加水250ml调成米浆\n5.将萝卜丝炒料倒入米浆，加盐半小勺、白胡椒粉半小勺拌匀\n6.倒入抹油容器，蒸锅大火蒸40分钟（火候：大火）\n7.取出晾凉切片\n8.平底锅中火煎至两面金黄即可","ingredients":"白萝卜500g\n粘米粉200g\n腊肠1根\n虾米20g\n香菇3朵\n盐1小勺\n白胡椒粉半小勺\n食用油适量\n蒸锅/平底锅"},{"category":"seasonal","month":"2月","stepTime":"煮腊肉10分钟\n煸炒5分钟\n爆炒2分钟","name":"蒜苗炒腊肉","type":"当季菜(冬季)","prepTime":"无","steps":"1.腊肉冷水下锅大火煮10分钟去咸，切薄片（火候：大火）\n2.蒜苗切斜段，蒜白蒜绿分开\n3.中火热油下腊肉片煸炒出油至微卷（火候：中火）\n4.下姜片干辣椒和蒜白段大火爆香（火候：大火）\n5.下蒜绿段大火翻炒1分钟\n6.加料酒1勺、生抽半勺、盐少许调味出锅","ingredients":"蒜苗200g\n腊肉150g\n姜3片\n干辣椒3个\n料酒1勺\n生抽半勺\n盐少许\n食用油1勺\n炒锅"},{"category":"seasonal","month":"2月","stepTime":"腌肉15分钟\n炒馅5分钟\n包制15分钟\n炸制5分钟","name":"春卷","type":"当季菜(冬季)","prepTime":"腌制15分钟","steps":"1.韭菜切碎、香菇泡发切丁、豆芽洗净\n2.肉馅加盐半小勺、生抽1勺、料酒1勺、白胡椒粉半小勺、淀粉1勺搅匀腌制15分钟\n3.中火热油炒熟肉馅盛出（火候：中火）\n4.混合韭菜香菇豆芽和肉馅拌匀\n5.春卷皮包入馅料卷紧\n6.锅中倒油中火烧至六成热（筷子冒泡）\n7.下春卷中火炸至金黄捞出（火候：中火），约3-4分钟\n8.大火复炸30秒更加酥脆","ingredients":"春卷皮20张\n猪肉馅200g\n韭菜100g\n豆芽100g\n香菇3朵\n盐1小勺\n生抽1勺\n料酒1勺\n白胡椒粉半小勺\n淀粉1勺\n食用油适量\n炒锅/炸锅"},{"category":"seasonal","month":"2月","stepTime":"醒面30分钟\n备馅10分钟\n包制15分钟\n煎制6分钟","name":"韭菜盒子","type":"当季菜(冬季)","prepTime":"醒面30分钟","steps":"1.面粉加温水揉成光滑面团，醒面30分钟\n2.韭菜洗净切碎，加少许油拌匀锁水\n3.鸡蛋打散加盐少许，大火热油炒熟搅碎盛出（火候：大火）\n4.粉丝温水泡软15分钟切碎\n5.混合韭菜、鸡蛋、粉丝，加盐1小勺、生抽1勺、香油1勺拌匀\n6.面团分剂擀成圆形面皮\n7.包入馅料对折捏紧花边\n8.平底锅中火刷油（火候：中火）\n9.放入韭菜盒子中火煎至一面金黄翻面（火候：中火），每面约3分钟\n10.两面金黄出锅","ingredients":"韭菜200g\n鸡蛋3个\n粉丝50g\n面粉300g\n温水150ml\n盐1小勺\n生抽1勺\n香油1勺\n食用油3勺\n平底锅"},{"category":"seasonal","month":"2月","stepTime":"浸泡15分钟\n腌制10分钟\n焯菠菜1分钟\n煮制2分钟","name":"菠菜猪肝汤","type":"当季菜(冬季)","prepTime":"浸泡15分钟","steps":"1.猪肝切薄片，清水浸泡15分钟去血水，换水2-3次\n2.猪肝沥干加料酒1勺、盐少许、淀粉1勺抓匀腌10分钟\n3.菠菜洗净，沸水大火焯30秒去草酸捞出过凉水（火候：大火），切段\n4.汤锅大火烧开水（火候：大火）\n5.加姜片，下猪肝片大火煮至变色立即捞出（火候：大火，约30秒，不要煮老）\n6.锅中水继续大火煮沸，下菠菜煮1分钟\n7.倒回猪肝，加盐1小勺调味\n8.撒枸杞，滴几滴香油出锅","ingredients":"菠菜150g\n猪肝150g\n姜4片\n枸杞少许\n料酒1勺\n盐1小勺\n淀粉1勺\n香油几滴\n汤锅"},{"category":"seasonal","month":"2月","stepTime":"腌肉15分钟\n焯芹菜1分钟\n滑炒2分钟\n翻炒2分钟","name":"芹菜炒牛肉","type":"当季菜(冬季)","prepTime":"腌制15分钟","steps":"1.牛肉逆纹切丝加料酒1勺、生抽1勺、淀粉1勺、盐少许腌15分钟\n2.芹菜去叶切段，小米辣切圈，蒜姜切末\n3.沸水大火焯芹菜段30秒捞出过凉水（火候：大火）\n4.中火热油下牛肉丝大火滑炒至变色盛出（火候：大火）\n5.留底油下姜蒜小米辣大火爆香（火候：大火）\n6.下芹菜段大火翻炒1分钟\n7.倒回牛肉丝，加生抽半勺、盐半小勺大火翻炒30秒出锅","ingredients":"牛肉200g\n芹菜200g\n小米辣2个\n蒜2瓣\n姜2片\n生抽1.5勺\n料酒1勺\n淀粉1勺\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"2月","stepTime":"腌肉10分钟\n滑炒2分钟\n炒胡萝卜2分钟\n汇合1分钟","name":"胡萝卜炒肉","type":"当季菜(冬季)","prepTime":"腌制10分钟","steps":"1.肉切片加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n2.胡萝卜去皮切菱形片\n3.中火热油下肉片滑炒至变色盛出（火候：中火）\n4.留底油大火爆香蒜末（火候：大火）\n5.下胡萝卜片大火翻炒2分钟至变软\n6.倒回肉片，加生抽半勺、料酒半勺、盐半小勺大火翻炒30秒\n7.撒葱花出锅","ingredients":"胡萝卜2根\n猪里脊肉150g\n蒜2瓣\n葱1根\n生抽1勺\n料酒1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"3月","stepTime":"焯笋3分钟\n腌肉10分钟\n滑肉2分钟\n炒笋2分钟\n汇合1分钟","name":"春笋炒肉","type":"当季菜(春季)","prepTime":"腌制10分钟","steps":"1.春笋剥壳切片，沸水大火焯3分钟去涩味，捞出沥干（火候：大火）\n2.猪肉切片加料酒半勺、生抽半勺、淀粉1勺、盐少许搅匀腌制10分钟\n3.中火热油下肉片滑炒至变色盛出（火候：中火）\n4.留底油大火爆香姜蒜（火候：大火）\n5.下笋片大火翻炒2分钟\n6.将肉片倒回，加生抽半勺、料酒半勺、白糖半小勺、盐半小勺大火翻炒1分钟\n7.撒葱花出锅","ingredients":"春笋300g\n猪里脊肉150g\n蒜2瓣\n姜3片\n葱1根\n料酒1勺\n生抽1勺\n盐1小勺\n白糖半小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"3月","stepTime":"备菜3分钟\n炒蛋1分钟\n炒韭菜1分钟","name":"韭菜炒鸡蛋","type":"当季菜(春季)","prepTime":"无","steps":"1.韭菜洗净切3cm段，沥干水分\n2.鸡蛋打散加盐半小勺搅匀\n3.大火热油至冒烟，倒入蛋液大火快速滑炒至凝固盛出（火候：大火）\n4.锅中补半勺油，大火下韭菜快速翻炒30秒（火候：大火）\n5.倒回鸡蛋，加盐半小勺大火翻炒30秒出锅（韭菜不能久炒否则出水）","ingredients":"韭菜200g\n鸡蛋4个\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"3月","stepTime":"焯荠菜1分钟\n炒肉沫2分钟\n煮汤5分钟","name":"荠菜豆腐羹","type":"当季菜(春季)","prepTime":"无","steps":"1.荠菜洗净焯水10秒捞出切碎\n2.豆腐切小丁\n3.中火热油炒香姜末和肉沫（火候：中火）\n4.加高汤大火煮沸（火候：大火）\n5.下豆腐丁小火煮3分钟（火候：小火）\n6.下荠菜碎搅匀\n7.加盐1小勺、白胡椒粉少许调味\n8.水淀粉勾薄芡\n9.淋入打散的蛋液搅成蛋花\n10.滴几滴香油出锅","ingredients":"荠菜150g\n嫩豆腐1盒\n猪肉沫50g\n鸡蛋1个\n姜末少许\n盐1小勺\n白胡椒粉少许\n水淀粉2勺\n高汤500ml\n香油几滴\n汤锅"},{"category":"seasonal","month":"3月","stepTime":"焯香椿1分钟\n烫豆腐1分钟","name":"香椿拌豆腐","type":"当季菜(春季)","prepTime":"无","steps":"1.香椿洗净，沸水大火焯30秒至变绿捞出过凉水（火候：大火）\n2.挤干水分切碎末\n3.豆腐切块入沸水烫1分钟捞出沥干\n4.将香椿末、蒜末、盐1小勺、生抽1勺、香油1勺调成酱汁\n5.浇在豆腐上拌匀即可","ingredients":"香椿100g\n嫩豆腐1盒\n盐1小勺\n生抽1勺\n香油1勺\n蒜末少许\n炒锅"},{"category":"seasonal","month":"3月","stepTime":"焯笋3分钟\n煸炒3分钟\n焖煮5分钟\n收汁2分钟","name":"油焖春笋","type":"当季菜(春季)","prepTime":"无","steps":"1.春笋剥壳切滚刀块，用刀背拍裂入味\n2.沸水大火焯春笋3分钟去涩味，捞出沥干（火候：大火）\n3.中火热油（油稍多）下春笋块中火煸炒至表面微焦（火候：中火），约3分钟\n4.加料酒1勺、生抽2勺、老抽1勺、白糖1.5勺翻炒上色\n5.加半碗水大火煮沸（火候：大火）\n6.转小火焖5分钟至汤汁浓稠（火候：小火）\n7.大火收汁至油亮（火候：大火）\n8.撒葱花出锅","ingredients":"春笋500g\n生抽2勺\n老抽1勺\n白糖1.5勺\n料酒1勺\n食用油3勺\n葱花少许\n炒锅"},{"category":"seasonal","month":"3月","stepTime":"焯菠菜1分钟\n炒蛋1分钟\n炒菠菜1分钟\n汇合1分钟","name":"菠菜炒鸡蛋","type":"当季菜(春季)","prepTime":"无","steps":"1.菠菜洗净，沸水大火焯30秒去草酸，捞出过凉水挤干切段（火候：大火）\n2.鸡蛋打散加盐少许搅匀\n3.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）\n4.中火热油爆香蒜末（火候：中火）\n5.下菠菜大火翻炒1分钟（火候：大火）\n6.倒回鸡蛋，加盐半小勺大火翻炒30秒出锅","ingredients":"菠菜200g\n鸡蛋3个\n蒜2瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"3月","stepTime":"腌肉10分钟\n滑炒2分钟\n炒豌豆苗1分钟","name":"豌豆苗炒肉","type":"当季菜(春季)","prepTime":"腌制10分钟","steps":"1.肉切丝加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n2.豌豆苗洗净沥干\n3.中火热油下肉丝滑炒至变色盛出（火候：中火）\n4.大火爆香蒜末（火候：大火）\n5.下豌豆苗大火快速翻炒（火候：大火），约30秒至变软\n6.倒回肉丝，加生抽半勺、盐半小勺大火翻炒15秒出锅（豌豆苗不能久炒）","ingredients":"豌豆苗250g\n猪里脊肉100g\n蒜2瓣\n生抽1勺\n料酒1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"3月","stepTime":"焯油菜1分钟\n炒蒜蓉2分钟","name":"蒜蓉油菜","type":"当季菜(春季)","prepTime":"无","steps":"1.油菜掰开洗净，大棵对半切开\n2.蒜剁成蒜蓉\n3.沸水大火加盐和油几滴，焯油菜梗30秒再下叶子焯15秒捞出（火候：大火）\n4.过凉水后沥干摆盘\n5.中火热油下一半蒜蓉小火炒至金黄（火候：小火）\n6.加生抽1勺、盐半小勺、水2勺搅匀煮沸\n7.淋在油菜上，撒另一半生蒜蓉\n8.大火热油浇在蒜蓉上激香即可（火候：大火）","ingredients":"油菜300g\n大蒜5瓣\n生抽1勺\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"4月","stepTime":"腌虾10分钟\n焯芦笋1分钟\n滑炒2分钟\n翻炒2分钟","name":"芦笋炒虾仁","type":"当季菜(春季)","prepTime":"腌制10分钟","steps":"1.虾仁开背去虾线，加料酒半勺、盐少许、淀粉半勺搅匀腌制10分钟\n2.芦笋削去老皮切斜段，沸水大火焯1分钟捞出过凉（火候：大火）\n3.中火热油下虾仁滑炒至变色盛出（火候：中火）\n4.大火爆香姜蒜（火候：大火）\n5.下芦笋大火翻炒1分钟\n6.倒回虾仁，加料酒半勺、盐半小勺、白糖半小勺、水淀粉勾薄芡\n7.大火翻炒30秒出锅","ingredients":"芦笋200g\n虾仁150g\n蒜2瓣\n姜2片\n料酒1勺\n盐1小勺\n白糖半小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"4月","stepTime":"剥蚕豆10分钟\n炒料3分钟\n煮饭30分钟","name":"蚕豆焖饭","type":"当季菜(春季)","prepTime":"无","steps":"1.蚕豆剥壳取豆仁\n2.腊肉切小丁\n3.中火热油下腊肉丁煸炒出油（火候：中火）\n4.下蚕豆翻炒1分钟\n5.大米淘洗干净加入电饭煲\n6.将炒好的蚕豆腊肉铺在米上\n7.加水和平时煮饭一样多，加盐1小勺\n8.按煮饭键煮熟即可\n9.出锅前拌匀","ingredients":"蚕豆200g\n大米200g\n腊肉100g\n盐1小勺\n食用油1勺\n电饭煲/炒锅"},{"category":"seasonal","month":"4月","stepTime":"腌肉10分钟\n焯水1分钟\n滑炒2分钟\n翻炒2分钟","name":"莴笋炒肉片","type":"当季菜(春季)","prepTime":"腌制10分钟","steps":"1.肉切片加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n2.莴笋去皮切片，胡萝卜切片\n3.沸水大火焯莴笋胡萝卜30秒捞出（火候：大火）\n4.中火热油下肉片滑炒至变色盛出（火候：中火）\n5.大火爆香姜蒜（火候：大火）\n6.下莴笋胡萝卜大火翻炒1分钟\n7.倒回肉片，加生抽半勺、料酒半勺、盐半小勺大火翻炒30秒出锅","ingredients":"莴笋1根\n猪里脊肉150g\n胡萝卜半根\n蒜2瓣\n姜2片\n料酒1勺\n生抽1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"4月","stepTime":"焯芦笋1分钟\n炒蒜蓉2分钟","name":"蒜蓉芦笋","type":"当季菜(春季)","prepTime":"无","steps":"1.芦笋削去老皮，切段\n2.沸水大火加盐几滴，焯芦笋1分钟捞出过凉水（火候：大火）\n3.蒜剁成蒜蓉\n4.芦笋摆盘\n5.中火热油下一半蒜蓉小火炒至金黄（火候：小火）\n6.加生抽1勺、盐半小勺、水2勺搅匀煮沸\n7.淋在芦笋上，撒另一半生蒜蓉\n8.大火热油浇在蒜蓉上激香即可（火候：大火）","ingredients":"芦笋250g\n大蒜5瓣\n生抽1勺\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"4月","stepTime":"剥蚕豆8分钟\n焯蚕豆2分钟\n炒蛋1分钟\n翻炒2分钟","name":"蚕豆炒鸡蛋","type":"当季菜(春季)","prepTime":"无","steps":"1.蚕豆剥壳取豆仁\n2.沸水大火焯蚕豆2分钟捞出（火候：大火）\n3.鸡蛋打散加盐少许搅匀\n4.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）\n5.中火热油爆香蒜末（火候：中火）\n6.下蚕豆大火翻炒1分钟\n7.倒回鸡蛋，加盐半小勺大火翻炒30秒出锅","ingredients":"蚕豆200g\n鸡蛋3个\n蒜2瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"4月","stepTime":"焯菜2分钟\n调汁拌制2分钟","name":"芹菜拌香干","type":"当季菜(春季)","prepTime":"腌制15分钟（可选）","steps":"1.芹菜去叶切段，香干切条\n2.沸水大火加盐几滴，焯芹菜段1分钟捞出过凉水（火候：大火）\n3.沸水大火焯香干1分钟捞出（火候：大火）\n4.蒜切末\n5.调酱汁：生抽1勺、醋1勺、香油1勺、盐半小勺、白糖半小勺、蒜末搅匀\n6.芹菜和香干混合，倒入酱汁拌匀\n7.冷藏腌制15分钟更入味","ingredients":"芹菜200g\n香干150g\n蒜2瓣\n生抽1勺\n醋1勺\n香油1勺\n盐半小勺\n白糖半小勺\n炒锅"},{"category":"seasonal","month":"4月","stepTime":"腌虾10分钟\n剥豌豆8分钟\n焯豌豆2分钟\n滑炒2分钟\n翻炒2分钟","name":"豌豆虾仁","type":"当季菜(春季)","prepTime":"腌制10分钟","steps":"1.虾仁开背去虾线，加料酒半勺、盐少许、淀粉半勺搅匀腌制10分钟\n2.豌豆剥壳取豆仁，沸水大火焯2分钟捞出（火候：大火）\n3.中火热油下虾仁滑炒至变色盛出（火候：中火）\n4.大火爆香姜蒜（火候：大火）\n5.下豌豆大火翻炒1分钟\n6.倒回虾仁，加料酒半勺、盐半小勺、白糖半小勺\n7.水淀粉勾薄芡大火翻炒30秒出锅","ingredients":"豌豆200g\n虾仁150g\n蒜2瓣\n姜2片\n料酒1勺\n盐1小勺\n白糖半小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"5月","stepTime":"剥豆10分钟\n焯豌豆2分钟\n炒肉沫3分钟\n翻炒2分钟","name":"豌豆炒肉沫","type":"当季菜(春季)","prepTime":"腌制5分钟","steps":"1.豌豆剥壳取豆仁\n2.沸水大火焯豌豆2分钟捞出（火候：大火）\n3.肉沫加料酒半勺、生抽半勺、盐少许腌5分钟\n4.中火热油下肉沫炒散至变色（火候：中火）\n5.下姜蒜末爆香\n6.下豌豆大火翻炒1分钟\n7.加生抽半勺、盐半小勺调味\n8.大火翻炒30秒出锅","ingredients":"豌豆200g\n猪肉沫100g\n蒜2瓣\n姜2片\n生抽1勺\n料酒1勺\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"5月","stepTime":"煮鸡肉15分钟\n放凉10分钟\n拌制2分钟","name":"黄瓜拌鸡丝","type":"当季菜(春季)","prepTime":"无","steps":"1.鸡胸肉冷水下锅，加姜片料酒，大火煮沸转小火煮15分钟至熟（火候：大火转小火）\n2.捞出放凉后手撕成丝\n3.黄瓜切丝，蒜切末，香菜切段\n4.调酱汁：生抽1勺、醋1勺、香油1勺、盐半小勺、白糖半小勺、蒜末搅匀\n5.鸡丝黄瓜丝混合，倒入酱汁拌匀\n6.可加辣椒油提味","ingredients":"黄瓜1根\n鸡胸肉200g\n蒜3瓣\n香菜适量\n生抽1勺\n醋1勺\n香油1勺\n盐半小勺\n白糖半小勺\n辣椒油可选\n炒锅"},{"category":"seasonal","month":"5月","stepTime":"腌肉10分钟\n焯茭白1分钟\n滑炒2分钟\n翻炒2分钟","name":"茭白炒肉丝","type":"当季菜(春季)","prepTime":"腌制10分钟","steps":"1.肉切丝加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n2.茭白去壳切丝，青椒切丝\n3.沸水大火焯茭白丝1分钟捞出（火候：大火）\n4.中火热油下肉丝滑炒至变色盛出（火候：中火）\n5.大火爆香姜蒜青椒丝（火候：大火）\n6.下茭白丝大火翻炒1分钟\n7.倒回肉丝，加生抽半勺、料酒半勺、盐半小勺大火翻炒30秒出锅","ingredients":"茭白3根\n猪里脊肉150g\n青椒1个\n蒜2瓣\n姜2片\n料酒1勺\n生抽1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"5月","stepTime":"腌肉10分钟\n焯蒜苔1分钟\n滑炒2分钟\n翻炒2分钟","name":"蒜苔炒肉","type":"当季菜(春季)","prepTime":"腌制10分钟","steps":"1.肉切丝加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n2.蒜苔去头尾切段\n3.沸水大火焯蒜苔1分钟捞出过凉水（火候：大火）\n4.中火热油下肉丝滑炒至变色盛出（火候：中火）\n5.大火爆香姜蒜（火候：大火）\n6.下蒜苔大火翻炒1分钟\n7.倒回肉丝，加生抽半勺、料酒半勺、盐半小勺大火翻炒30秒出锅","ingredients":"蒜苔200g\n猪里脊肉150g\n姜2片\n蒜2瓣\n生抽1勺\n料酒1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"5月","stepTime":"泡发木耳1小时\n焯木耳2分钟\n腌黄瓜10分钟\n拌制2分钟","name":"凉拌木耳黄瓜","type":"当季菜(春季)","prepTime":"泡发木耳1小时","steps":"1.干木耳提前泡发1小时，撕小朵\n2.沸水大火焯木耳2分钟捞出过凉水（火候：大火）\n3.黄瓜拍碎切段，加盐半小勺腌10分钟出水倒掉\n4.蒜切末，小米辣切圈\n5.调酱汁：生抽1勺、醋1.5勺、盐半小勺、白糖1小勺、香油1勺、蒜末小米辣搅匀\n6.木耳和黄瓜混合，倒入酱汁拌匀\n7.冷藏腌制15分钟更入味","ingredients":"黄瓜1根\n干木耳30g\n蒜3瓣\n小米辣2个\n生抽1勺\n醋1.5勺\n盐1小勺\n白糖1小勺\n香油1勺\n炒锅"},{"category":"seasonal","month":"5月","stepTime":"焯生菜1分钟\n炒蒜蓉2分钟\n煮汁1分钟","name":"蚝油生菜","type":"当季菜(春季)","prepTime":"无","steps":"1.生菜掰开洗净沥干\n2.蒜剁成蒜蓉\n3.沸水大火加盐和油几滴，焯生菜10秒立即捞出过凉水（火候：大火）\n4.生菜沥干摆盘\n5.调蚝油汁：蚝油1.5勺、生抽1勺、白糖半小勺、淀粉1勺、水3勺搅匀\n6.中火热油下蒜蓉小火炒至金黄（火候：小火）\n7.倒入蚝油汁小火煮至浓稠冒泡（火候：小火）\n8.淋在生菜上即可","ingredients":"生菜300g\n大蒜5瓣\n蚝油1.5勺\n生抽1勺\n盐少许\n白糖半小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"5月","stepTime":"焯茭白1分钟\n炒蛋1分钟\n炒茭白1分钟\n汇合1分钟","name":"茭白炒鸡蛋","type":"当季菜(春季)","prepTime":"无","steps":"1.茭白去壳切薄片，沸水大火焯1分钟捞出（火候：大火）\n2.鸡蛋打散加盐少许搅匀\n3.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）\n4.中火热油爆香蒜末（火候：中火）\n5.下茭白片大火翻炒1分钟至微焦\n6.倒回鸡蛋，加盐半小勺大火翻炒30秒出锅","ingredients":"茭白3根\n鸡蛋3个\n蒜2瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"6月","stepTime":"腌苦瓜10分钟\n炒蛋1分钟\n炒苦瓜2分钟\n汇合1分钟","name":"苦瓜炒蛋","type":"当季菜(夏季)","prepTime":"腌制10分钟","steps":"1.苦瓜对半切开去瓤去白膜，切薄片\n2.加盐半小勺抓匀腌10分钟去苦味，挤干水分\n3.鸡蛋打散加盐少许搅匀\n4.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）\n5.中火热油爆香蒜末（火候：中火）\n6.下苦瓜中火翻炒2分钟至断生\n7.倒回鸡蛋，加白糖半小勺、盐少许大火翻炒30秒出锅","ingredients":"苦瓜1根\n鸡蛋3个\n蒜2瓣\n盐1小勺\n白糖半小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"6月","stepTime":"浸泡20分钟\n焯水5分钟\n炖排骨40分钟\n炖冬瓜15分钟","name":"冬瓜排骨汤","type":"当季菜(夏季)","prepTime":"浸泡20分钟","steps":"1.排骨冷水浸泡20分钟去血水\n2.冷水下锅加姜2片料酒半勺大火焯水，撇浮沫捞出（火候：大火）\n3.砂锅加水大火烧开（火候：大火）\n4.下排骨姜片大火煮沸转小火炖40分钟（火候：小火）\n5.冬瓜去皮去瓤切厚块\n6.排骨炖40分钟后下冬瓜继续小火炖15分钟（火候：小火）\n7.加盐1.5小勺调味，撒葱花出锅","ingredients":"排骨300g\n冬瓜500g\n姜4片\n葱1根\n料酒1勺\n盐1.5小勺\n食用油少许\n砂锅"},{"category":"seasonal","month":"6月","stepTime":"腌黄瓜10分钟\n调汁拌制2分钟","name":"凉拌黄瓜","type":"当季菜(夏季)","prepTime":"腌制10分钟","steps":"1.黄瓜洗净拍碎切段\n2.加盐半小勺腌10分钟出水，倒掉水\n3.蒜切末小米辣切圈\n4.调酱汁：生抽1勺、醋1.5勺、盐半小勺、白糖1小勺、香油1勺、蒜末小米辣搅匀\n5.酱汁倒入黄瓜拌匀\n6.撒香菜段即可","ingredients":"黄瓜2根\n蒜3瓣\n小米辣2个\n生抽1勺\n醋1.5勺\n盐1小勺\n白糖1小勺\n香油1勺\n香菜适量"},{"category":"seasonal","month":"6月","stepTime":"剥豆10分钟\n焯毛豆3分钟\n炒肉沫3分钟\n翻炒2分钟","name":"毛豆炒肉沫","type":"当季菜(夏季)","prepTime":"腌制5分钟","steps":"1.毛豆剥壳取豆仁\n2.沸水大火焯毛豆3分钟捞出（火候：大火）\n3.肉沫加料酒半勺、生抽半勺、盐少许腌5分钟\n4.中火热油下肉沫炒散至变色（火候：中火）\n5.下蒜末小米辣爆香\n6.下毛豆大火翻炒1分钟\n7.加生抽半勺、盐半小勺调味\n8.大火翻炒30秒出锅","ingredients":"毛豆300g\n猪肉沫100g\n蒜2瓣\n小米辣2个\n生抽1勺\n料酒1勺\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"6月","stepTime":"备菜3分钟\n炒蛋1分钟\n炒西红柿2分钟\n汇合1分钟","name":"西红柿炒鸡蛋","type":"当季菜(夏季)","prepTime":"无","steps":"1.鸡蛋打散加盐少许搅匀\n2.西红柿切小块\n3.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）\n4.中火热油下西红柿块大火炒软出汁（火候：大火）\n5.加白糖1小勺提鲜中和酸味\n6.炒至西红柿出汁变软（约2分钟）\n7.倒回鸡蛋，加盐半小勺大火翻炒30秒\n8.撒葱花出锅","ingredients":"西红柿2个\n鸡蛋3个\n葱1根\n盐1小勺\n白糖1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"6月","stepTime":"蒸茄子15分钟\n放凉5分钟\n拌制2分钟","name":"凉拌茄子","type":"当季菜(夏季)","prepTime":"无","steps":"1.茄子去蒂洗净，蒸锅大火烧开水（火候：大火）\n2.茄子整个入锅大火蒸15分钟至软烂（火候：大火）\n3.取出放凉后手撕成条\n4.蒜切末，小米辣切圈\n5.调酱汁：生抽1勺、醋1勺、香油1勺、盐半小勺、白糖半小勺、蒜末小米辣搅匀\n6.酱汁淋在茄子上拌匀\n7.撒葱花即可","ingredients":"茄子2根\n蒜3瓣\n小米辣2个\n生抽1勺\n醋1勺\n香油1勺\n盐半小勺\n白糖半小勺\n葱花少许\n蒸锅"},{"category":"seasonal","month":"6月","stepTime":"泡发海带1小时\n煮海带15分钟\n煮冬瓜10分钟","name":"冬瓜海带汤","type":"当季菜(夏季)","prepTime":"泡发海带1小时","steps":"1.干海带提前泡发1小时洗净切条\n2.冬瓜去皮去瓤切厚块\n3.汤锅大火烧开水（火候：大火）\n4.下姜片和海带大火煮沸转小火煮15分钟（火候：小火）\n5.下冬瓜块继续小火煮10分钟至冬瓜透明\n6.加盐1.5小勺调味\n7.撒葱花出锅","ingredients":"冬瓜300g\n干海带20g\n姜4片\n盐1.5小勺\n食用油少许\n葱花少许\n汤锅"},{"category":"seasonal","month":"6月","stepTime":"腌肉10分钟\n滑炒2分钟\n炒青椒1分钟\n汇合1分钟","name":"青椒肉丝","type":"当季菜(夏季)","prepTime":"腌制10分钟","steps":"1.肉切丝加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n2.青椒去籽切丝\n3.中火热油下肉丝滑炒至变色盛出（火候：中火）\n4.大火爆香姜蒜（火候：大火）\n5.下青椒丝大火翻炒30秒至断生\n6.倒回肉丝，加生抽半勺、料酒半勺、盐半小勺大火翻炒30秒出锅","ingredients":"青椒2个\n猪里脊肉150g\n蒜2瓣\n姜2片\n生抽1勺\n料酒1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"7月","stepTime":"备菜3分钟\n炒蛋1分钟\n炒丝瓜2分钟\n汇合1分钟","name":"丝瓜炒蛋","type":"当季菜(夏季)","prepTime":"无","steps":"1.丝瓜去皮切滚刀块\n2.鸡蛋打散加盐少许搅匀\n3.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）\n4.中火热油爆香蒜末（火候：中火）\n5.下丝瓜大火翻炒至变软出汁（火候：大火）\n6.倒回鸡蛋，加盐半小勺大火翻炒30秒出锅","ingredients":"丝瓜1根\n鸡蛋3个\n蒜2瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"7月","stepTime":"焯藕带1分钟\n炒料2分钟\n翻炒2分钟","name":"酸辣藕带","type":"当季菜(夏季)","prepTime":"无","steps":"1.藕带洗净斜切成段\n2.沸水大火焯藕带1分钟捞出过凉水（火候：大火）\n3.中火热油下花椒干辣椒小火炸香后捞出（火候：小火→中火）\n4.下姜蒜末大火爆香（火候：大火）\n5.下藕带大火翻炒1分钟\n6.加醋1.5勺、生抽1勺、盐1小勺、白糖半小勺调味\n7.大火翻炒30秒出锅","ingredients":"藕带300g\n干辣椒3个\n花椒少许\n蒜2瓣\n姜2片\n醋1.5勺\n生抽1勺\n盐1小勺\n白糖半小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"7月","stepTime":"备菜3分钟\n炒制1分钟","name":"蒜蓉空心菜","type":"当季菜(夏季)","prepTime":"无","steps":"1.空心菜摘段洗净沥干\n2.蒜剁成蒜蓉\n3.大火热油至冒烟（火候：大火）\n4.下蒜蓉大火爆香10秒\n5.立即下空心菜大火快速翻炒（火候：大火）\n6.菜变软后加盐1小勺翻炒均匀\n7.全程大火炒约1分钟出锅（空心菜不能久炒否则变黑）","ingredients":"空心菜300g\n蒜5瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"7月","stepTime":"腌西瓜皮10分钟\n腌肉10分钟\n滑炒2分钟\n翻炒2分钟","name":"西瓜皮炒肉丝","type":"当季菜(夏季)","prepTime":"腌制10分钟","steps":"1.西瓜皮去外皮和红瓤，切薄片\n2.加盐半小勺腌10分钟出水，挤干\n3.肉切丝加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n4.中火热油下肉丝滑炒至变色盛出（火候：中火）\n5.大火爆香蒜末干辣椒（火候：大火）\n6.下西瓜皮大火翻炒1分钟\n7.倒回肉丝，加生抽半勺、盐半小勺大火翻炒30秒出锅","ingredients":"西瓜皮300g\n猪里脊肉100g\n蒜2瓣\n干辣椒2个\n生抽1勺\n料酒1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"7月","stepTime":"焯豇豆2分钟\n腌茄子10分钟\n煎茄子5分钟\n炒制3分钟\n焖制2分钟","name":"豇豆炒茄子","type":"当季菜(夏季)","prepTime":"腌制10分钟","steps":"1.豇豆去筋切段，沸水大火焯2分钟捞出（火候：大火）\n2.茄子切条加盐半小勺腌10分钟出水挤干\n3.中火热油（油稍多）下茄子条中火煎软盛出（火候：中火）\n4.留底油下干辣椒小火炸香（火候：小火）\n5.下蒜末大火爆香（火候：大火）\n6.下豇豆大火翻炒1分钟\n7.倒回茄子，加生抽1勺、老抽半勺、盐半小勺、白糖半小勺翻炒\n8.加少量水小火焖2分钟入味（火候：小火）\n9.大火翻炒30秒出锅","ingredients":"豇豆150g\n茄子2根\n蒜3瓣\n干辣椒2个\n生抽1勺\n老抽半勺\n盐1小勺\n白糖半小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"7月","stepTime":"备菜3分钟\n炒蒜蓉2分钟\n蒸制5分钟","name":"蒜蓉蒸丝瓜","type":"当季菜(夏季)","prepTime":"无","steps":"1.丝瓜去皮切段（约3cm），摆盘\n2.蒜剁成蒜蓉\n3.中火热油下一半蒜蓉小火炒至金黄（火候：小火）\n4.加生抽1勺、蚝油1勺、盐少许搅匀成蒜蓉酱\n5.蒜蓉酱铺在丝瓜段上\n6.蒸锅大火烧开水（火候：大火）\n7.大火蒸5分钟至丝瓜变软（火候：大火）\n8.出锅撒另一半生蒜蓉\n9.大火热油浇在蒜蓉上激香即可（火候：大火）","ingredients":"丝瓜2根\n大蒜5瓣\n生抽1勺\n蚝油1勺\n盐少许\n食用油2勺\n蒸锅"},{"category":"seasonal","month":"7月","stepTime":"焯苦瓜1分钟\n调汁拌制2分钟","name":"凉拌苦瓜","type":"当季菜(夏季)","prepTime":"无","steps":"1.苦瓜对半切开去瓤去白膜，切薄片\n2.沸水大火加盐几滴，焯苦瓜片30秒捞出过冰水（火候：大火）\n3.蒜切末，小米辣切圈\n4.调酱汁：生抽1勺、醋1勺、香油1勺、盐半小勺、白糖半小勺、蒜末小米辣搅匀\n5.苦瓜沥干倒入酱汁拌匀\n6.撒白芝麻即可","ingredients":"苦瓜1根\n蒜2瓣\n小米辣1个\n生抽1勺\n醋1勺\n香油1勺\n盐半小勺\n白糖半小勺\n白芝麻少许\n炒锅"},{"category":"seasonal","month":"7月","stepTime":"腌西瓜皮15分钟\n炒制2分钟","name":"酸辣西瓜皮","type":"当季菜(夏季)","prepTime":"腌制15分钟","steps":"1.西瓜皮去外皮和红瓤，切薄片\n2.加盐半小勺腌15分钟出水，挤干\n3.蒜切末，小米辣切圈\n4.大火热油下蒜末小米辣大火爆香（火候：大火）\n5.下西瓜皮大火翻炒1分钟\n6.加醋1.5勺、生抽1勺、白糖半小勺、盐半小勺大火翻炒30秒\n7.出锅（保持脆爽口感）","ingredients":"西瓜皮300g\n蒜2瓣\n小米辣2个\n醋1.5勺\n生抽1勺\n盐1小勺\n白糖半小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"8月","stepTime":"腌茄子10分钟\n煎茄子5分钟\n炒肉沫3分钟\n焖制3分钟","name":"茄子煲","type":"当季菜(夏季)","prepTime":"腌制10分钟","steps":"1.茄子切条，加盐半小勺腌10分钟出水，挤干\n2.肉沫加料酒生抽各半勺腌5分钟\n3.中火热油（油稍多）下茄子条中火煎软盛出（火候：中火）\n4.留底油下肉沫炒散至变色\n5.下姜蒜末和豆瓣酱1勺小火炒出红油（火候：小火）\n6.倒回茄子，加生抽1勺、老抽半勺、白糖半小勺翻炒\n7.加少量水小火焖3分钟（火候：小火）\n8.水淀粉勾薄芡，撒葱花出锅","ingredients":"茄子2根\n猪肉沫100g\n蒜3瓣\n姜2片\n葱1根\n豆瓣酱1勺\n生抽1勺\n老抽半勺\n白糖半小勺\n淀粉1勺\n食用油3勺\n砂锅"},{"category":"seasonal","month":"8月","stepTime":"焯秋葵1分钟\n炒蛋1分钟\n炒秋葵1分钟\n汇合1分钟","name":"秋葵炒蛋","type":"当季菜(夏季)","prepTime":"无","steps":"1.秋葵洗净，沸水大火焯1分钟捞出过凉水（火候：大火）\n2.斜切成段\n3.鸡蛋打散加盐少许搅匀\n4.大火热油倒入蛋液大火滑炒至凝固盛出（火候：大火）\n5.中火热油爆香蒜末（火候：中火）\n6.下秋葵大火翻炒1分钟\n7.倒回鸡蛋，加盐半小勺大火翻炒30秒出锅","ingredients":"秋葵200g\n鸡蛋3个\n蒜2瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"8月","stepTime":"泡发2小时\n熬银耳40分钟\n加百合熬10分钟","name":"莲子百合汤","type":"当季菜(夏季)","prepTime":"泡发2小时","steps":"1.银耳提前泡发2小时撕小朵\n2.莲子去芯泡1小时\n3.百合掰开洗净\n4.砂锅大火烧开水（火候：大火）\n5.下银耳莲子大火煮沸转小火熬40分钟至银耳出胶（火候：小火）\n6.下百合枸杞冰糖继续小火熬10分钟\n7.出锅","ingredients":"莲子50g\n百合30g\n银耳1朵\n冰糖30g\n枸杞少许\n水1000ml\n砂锅"},{"category":"seasonal","month":"8月","stepTime":"焯豇豆2分钟\n腌肉10分钟\n滑炒2分钟\n翻炒2分钟","name":"豇豆炒肉","type":"当季菜(夏季)","prepTime":"腌制10分钟","steps":"1.豇豆去筋切段，沸水大火焯2分钟捞出（火候：大火）\n2.肉片加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n3.中火热油下肉片滑炒至变色盛出（火候：中火）\n4.大火爆香蒜末干辣椒（火候：大火）\n5.下豇豆大火翻炒1分钟\n6.倒回肉片，加生抽半勺、盐半小勺大火翻炒30秒出锅","ingredients":"豇豆200g\n猪肉片100g\n蒜2瓣\n干辣椒2个\n生抽1勺\n料酒1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"8月","stepTime":"泡米30分钟\n熬煮40分钟","name":"南瓜粥","type":"当季菜(夏季)","prepTime":"泡米30分钟","steps":"1.大米淘洗后泡30分钟\n2.南瓜去皮去瓤切小块\n3.砂锅大火烧开水（火候：大火）\n4.下大米大火煮沸转小火熬20分钟（火候：小火）\n5.下南瓜块继续小火熬15分钟至南瓜软烂\n6.用勺子将南瓜压碎搅匀\n7.加冰糖搅匀再熬5分钟\n8.熬至粘稠出锅","ingredients":"南瓜300g\n大米100g\n冰糖30g\n水1000ml\n砂锅"},{"category":"seasonal","month":"8月","stepTime":"煎冬瓜3分钟\n焖煮5分钟\n收汁1分钟","name":"红烧冬瓜","type":"当季菜(夏季)","prepTime":"无","steps":"1.冬瓜去皮去瓤切厚块，表面划十字花刀方便入味\n2.蒜切末，葱切葱花\n3.中火热油下冬瓜块中火煎至两面微黄（火候：中火），约3分钟\n4.下蒜末爆香\n5.加生抽1.5勺、老抽半勺、白糖1小勺、盐半小勺翻炒上色\n6.加半碗水大火煮沸（火候：大火）\n7.转小火焖5分钟至冬瓜透明入味（火候：小火）\n8.大火收汁撒葱花出锅（火候：大火）","ingredients":"冬瓜500g\n蒜3瓣\n葱1根\n生抽1.5勺\n老抽半勺\n白糖1小勺\n盐半小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"8月","stepTime":"焯秋葵2分钟\n调汁拌制2分钟","name":"凉拌秋葵","type":"当季菜(夏季)","prepTime":"无","steps":"1.秋葵洗净不要去蒂，沸水大火加盐几滴焯2分钟捞出过冰水（火候：大火）\n2.切去蒂部，斜切成段\n3.蒜切末，小米辣切圈\n4.调酱汁：生抽1.5勺、醋1勺、香油1勺、盐半小勺、白糖半小勺、蒜末小米辣搅匀\n5.秋葵摆盘淋上酱汁即可","ingredients":"秋葵250g\n蒜3瓣\n小米辣2个\n生抽1.5勺\n醋1勺\n香油1勺\n盐半小勺\n白糖半小勺\n炒锅"},{"category":"seasonal","month":"8月","stepTime":"备菜5分钟\n炒制1分钟","name":"清炒南瓜藤","type":"当季菜(夏季)","prepTime":"无","steps":"1.南瓜藤撕去外皮，摘成段\n2.洗净沥干水分\n3.蒜切末\n4.大火热油至冒烟（火候：大火）\n5.下蒜末大火爆香10秒\n6.立即下南瓜藤大火快速翻炒（火候：大火）\n7.炒至变软后加盐1小勺翻炒均匀\n8.全程大火约1分钟出锅","ingredients":"南瓜藤300g\n大蒜3瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"9月","stepTime":"剥板栗15分钟\n浸泡15分钟\n焯水5分钟\n炒糖色3分钟\n炖煮35分钟\n收汁3分钟","name":"板栗烧鸡","type":"当季菜(秋季)","prepTime":"剥板栗15分钟","steps":"1.板栗去壳去皮（可沸水煮3分钟更好剥）\n2.鸡切块冷水浸泡15分钟去血水\n3.冷水下锅大火焯水，加姜2片料酒半勺，撇浮沫捞出（火候：大火）\n4.中火热油下冰糖小火炒糖色至棕红色冒泡（火候：小火）\n5.下鸡块大火翻炒上色（火候：大火）\n6.加姜片料酒半勺、生抽2勺、老抽1勺炒匀\n7.加开水没过鸡块，大火煮沸转小火炖20分钟（火候：小火）\n8.下板栗继续小火炖15分钟\n9.加盐1小勺调味，大火收汁3分钟撒葱花出锅","ingredients":"鸡半只\n板栗200g\n姜4片\n葱1根\n料酒1勺\n生抽2勺\n老抽1勺\n冰糖15g\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"9月","stepTime":"浸泡20分钟\n焯水5分钟\n炖煮60分钟","name":"莲藕排骨汤","type":"当季菜(秋季)","prepTime":"浸泡20分钟","steps":"1.排骨冷水浸泡20分钟去血水\n2.冷水下锅加姜2片料酒半勺大火焯水捞出（火候：大火）\n3.莲藕去皮切滚刀块\n4.砂锅大火烧开水（火候：大火）\n5.下排骨莲藕姜片大火煮沸\n6.转小火炖1小时（火候：小火）\n7.加盐1.5小勺调味，撒葱花出锅","ingredients":"排骨300g\n莲藕1节\n姜4片\n葱1根\n料酒1勺\n盐1.5小勺\n砂锅"},{"category":"seasonal","month":"9月","stepTime":"浸泡15分钟\n腌制30分钟\n蒸制25分钟","name":"南瓜蒸排骨","type":"当季菜(秋季)","prepTime":"腌制30分钟","steps":"1.排骨斩小段，冷水浸泡15分钟去血水\n2.加蒜末、豆豉、生抽1勺、蚝油1勺、料酒1勺、淀粉1勺、白糖半小勺、盐少许、食用油1勺拌匀腌制30分钟\n3.南瓜去皮切厚片铺在盘底\n4.腌好的排骨铺在南瓜上\n5.蒸锅大火烧开水（火候：大火）\n6.放入盘子大火蒸25分钟至排骨熟透\n7.出锅撒葱花","ingredients":"排骨300g\n南瓜300g\n蒜3瓣\n豆豉1勺\n生抽1勺\n蚝油1勺\n料酒1勺\n淀粉1勺\n白糖半小勺\n盐少许\n食用油1勺\n蒸锅"},{"category":"seasonal","month":"9月","stepTime":"泡发木耳1小时\n焯水2分钟\n翻炒2分钟","name":"山药炒木耳","type":"当季菜(秋季)","prepTime":"泡发木耳1小时","steps":"1.木耳提前泡发1小时撕小朵\n2.山药去皮切菱形片（戴手套防过敏），泡水防氧化\n3.胡萝卜切菱形片\n4.沸水大火焯山药木耳胡萝卜各1分钟捞出（火候：大火）\n5.大火热油爆香蒜片（火候：大火）\n6.所有食材大火翻炒1分钟\n7.加盐1小勺调味翻炒均匀出锅","ingredients":"山药200g\n黑木耳50g\n胡萝卜半根\n蒜2瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"9月","stepTime":"煮板栗15分钟\n炒制8分钟","name":"糖炒栗子","type":"当季菜(秋季)","prepTime":"无","steps":"1.板栗洗净，用刀在每个板栗上划十字口\n2.锅中加板栗和没过板栗的水\n3.大火煮沸后转小火煮15分钟（火候：小火）\n4.捞出沥干水分\n5.中火热锅下板栗，加白糖和食用油（火候：中火）\n6.中火不断翻炒至糖融化裹在板栗上（火候：中火）\n7.炒至板栗表面油亮，切口裂开即可\n8.趁热最好剥","ingredients":"板栗500g\n白糖50g\n食用油1勺\n炒锅"},{"category":"seasonal","month":"9月","stepTime":"蒸南瓜15分钟\n打糊2分钟\n加热3分钟","name":"南瓜羹","type":"当季菜(秋季)","prepTime":"无","steps":"1.南瓜去皮去瓤切小块\n2.蒸锅大火烧开水（火候：大火）\n3.南瓜大火蒸15分钟至软烂（火候：大火）\n4.蒸好的南瓜加牛奶200ml放入搅拌机打成细腻糊状\n5.南瓜糊倒入汤锅小火加热（火候：小火）\n6.加白糖1勺搅匀\n7.煮至微沸即可\n8.盛碗撒枸杞点缀","ingredients":"南瓜400g\n牛奶200ml\n白糖1勺\n枸杞少许\n搅拌机/汤锅"},{"category":"seasonal","month":"9月","stepTime":"泡发木耳1小时\n焯水2分钟\n翻炒1分钟","name":"清炒山药","type":"当季菜(秋季)","prepTime":"泡发木耳1小时","steps":"1.木耳提前泡发1小时撕小朵\n2.山药去皮切菱形片（戴手套），泡水防氧化\n3.胡萝卜切菱形片\n4.沸水大火焯山药胡萝卜木耳各30秒捞出（火候：大火）\n5.大火热油爆香蒜片（火候：大火）\n6.所有食材大火翻炒1分钟\n7.加盐1小勺调味翻炒均匀出锅","ingredients":"山药300g\n胡萝卜半根\n木耳30g\n蒜2瓣\n盐1小勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"9月","stepTime":"腌肉10分钟\n焯藕片1分钟\n滑炒2分钟\n翻炒2分钟","name":"莲藕炒肉片","type":"当季菜(秋季)","prepTime":"腌制10分钟","steps":"1.肉切片加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n2.莲藕去皮切薄片，泡水防氧化\n3.沸水大火焯藕片1分钟捞出过凉水（火候：大火）\n4.中火热油下肉片滑炒至变色盛出（火候：中火）\n5.大火爆香姜蒜（火候：大火）\n6.下藕片大火翻炒1分钟\n7.倒回肉片，加生抽半勺、料酒半勺、盐半小勺大火翻炒30秒出锅","ingredients":"莲藕1节\n猪里脊肉150g\n蒜2瓣\n姜2片\n生抽1勺\n料酒1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"10月","stepTime":"洗蟹5分钟\n蒸制15分钟","name":"大闸蟹清蒸","type":"当季菜(秋季)","prepTime":"无","steps":"1.大闸蟹用刷子刷洗干净，不要解开绳子\n2.蒸锅大火烧开水（火候：大火）\n3.蒸屉铺姜片葱段和紫苏叶\n4.蟹肚朝上放蒸屉大火蒸15分钟（火候：大火）\n5.调蘸料：姜切末加醋2勺、生抽1勺、白糖半小勺搅匀\n6.时间到关火，取出蘸食","ingredients":"大闸蟹4只\n姜1块\n葱2根\n紫苏叶几片\n醋2勺\n生抽1勺\n白糖半小勺\n蒸锅"},{"category":"seasonal","month":"10月","stepTime":"泡米2小时\n灌米15分钟\n炖煮90分钟","name":"桂花糯米藕","type":"当季菜(秋季)","prepTime":"泡米2小时","steps":"1.糯米提前泡2小时\n2.莲藕去皮，一端切开做盖子\n3.将糯米塞入藕孔用筷子压实\n4.用牙签固定盖子\n5.砂锅加水大火烧开（火候：大火）\n6.放入藕、红糖、冰糖、红枣\n7.大火煮沸转小火炖1.5小时（火候：小火）\n8.取出切片淋汤汁撒桂花即可","ingredients":"莲藕1节\n糯米100g\n红糖50g\n冰糖30g\n桂花少许\n红枣5颗\n砂锅"},{"category":"seasonal","month":"10月","stepTime":"浸泡20分钟\n焯水5分钟\n煸炒5分钟\n炖煮50分钟\n收汁3分钟","name":"芋头焖鸭","type":"当季菜(秋季)","prepTime":"浸泡20分钟","steps":"1.鸭切块冷水浸泡20分钟去血水\n2.冷水下锅大火焯水加姜3片料酒1勺，撇浮沫捞出（火候：大火）\n3.芋头去皮切块（戴手套）\n4.中火热油下鸭块大火煸炒至表面微焦（火候：中火→大火）\n5.下姜蒜爆香，加料酒1勺、生抽2勺、老抽1勺、冰糖翻炒\n6.加开水没过鸭肉大火煮沸\n7.转小火炖30分钟（火候：小火）\n8.下芋头块继续小火炖20分钟至芋头软糯\n9.加盐1小勺，大火收汁3分钟撒葱花","ingredients":"鸭半只\n芋头300g\n姜5片\n蒜3瓣\n葱1根\n生抽2勺\n老抽1勺\n料酒2勺\n冰糖15g\n盐1小勺\n食用油2勺\n炒锅/砂锅"},{"category":"seasonal","month":"10月","stepTime":"浸泡15分钟\n焯水5分钟\n炖煮60分钟","name":"白果炖鸡","type":"当季菜(秋季)","prepTime":"浸泡15分钟","steps":"1.白果去壳去衣，焯水2分钟去苦味\n2.鸡切块冷水浸泡15分钟\n3.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）\n4.砂锅大火烧开水（火候：大火）\n5.下鸡块白果姜片大火煮沸\n6.转小火炖1小时（火候：小火）\n7.加盐1.5小勺调味撒葱花出锅","ingredients":"老母鸡半只\n白果（银杏）100g\n姜4片\n葱1根\n料酒1勺\n盐1.5小勺\n砂锅"},{"category":"seasonal","month":"10月","stepTime":"泡米30分钟\n熬煮40分钟","name":"红薯粥","type":"当季菜(秋季)","prepTime":"泡米30分钟","steps":"1.大米淘洗后泡30分钟\n2.红薯去皮切小丁\n3.砂锅大火烧开水（火候：大火）\n4.下大米大火煮沸转小火熬20分钟（火候：小火）\n5.下红薯丁继续小火熬15分钟至红薯软烂\n6.加冰糖搅匀再熬5分钟\n7.熬至粘稠出锅","ingredients":"红薯1个\n大米100g\n冰糖20g\n水1000ml\n砂锅"},{"category":"seasonal","month":"10月","stepTime":"浸泡20分钟\n焯水5分钟\n炖煮55分钟","name":"山药排骨汤","type":"当季菜(秋季)","prepTime":"浸泡20分钟","steps":"1.排骨冷水浸泡20分钟去血水\n2.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）\n3.山药去皮切滚刀块（戴手套）\n4.砂锅大火烧开水（火候：大火）\n5.下排骨姜片红枣大火煮沸\n6.转小火炖40分钟（火候：小火）\n7.下山药继续小火炖15分钟\n8.加盐1.5小勺调味出锅","ingredients":"排骨300g\n山药200g\n红枣8颗\n姜4片\n盐1.5小勺\n料酒1勺\n砂锅"},{"category":"seasonal","month":"10月","stepTime":"泡米2小时\n灌米15分钟\n炖煮60分钟","name":"桂花糖藕","type":"当季菜(秋季)","prepTime":"泡米2小时","steps":"1.糯米提前泡2小时\n2.莲藕去皮，一端切开做盖子\n3.将糯米塞入藕孔用筷子压实\n4.用牙签固定盖子\n5.砂锅加水大火烧开（火候：大火）\n6.放入藕、红糖、冰糖\n7.大火煮沸转小火炖1小时（火候：小火）\n8.取出切片，淋汤汁撒桂花即可","ingredients":"莲藕1节\n糯米80g\n红糖40g\n冰糖20g\n桂花少许\n砂锅"},{"category":"seasonal","month":"10月","stepTime":"浸泡15分钟\n腌制30分钟\n蒸制25分钟","name":"芋头蒸排骨","type":"当季菜(秋季)","prepTime":"腌制30分钟","steps":"1.排骨斩小段冷水浸泡15分钟去血水沥干\n2.加蒜末、豆豉（剁碎）、生抽1.5勺、蚝油1勺、料酒1勺、淀粉1勺、白糖半小勺、盐少许、食用油1勺拌匀腌30分钟\n3.芋头去皮切滚刀块（戴手套）铺在盘底\n4.腌好的排骨铺在芋头上\n5.蒸锅大火烧开水（火候：大火）\n6.大火蒸25分钟至排骨熟透芋头软糯（火候：大火）\n7.出锅撒葱花","ingredients":"排骨300g\n小芋头200g\n蒜末1勺\n豆豉1勺\n生抽1.5勺\n蚝油1勺\n淀粉1勺\n料酒1勺\n白糖半小勺\n盐少许\n食用油1勺\n蒸锅"},{"category":"seasonal","month":"11月","stepTime":"浸泡30分钟\n焯水5分钟\n炒制5分钟\n炖煮110分钟\n收汁3分钟","name":"萝卜炖牛腩","type":"当季菜(秋季)","prepTime":"浸泡30分钟","steps":"1.牛腩切块冷水浸泡30分钟去血水\n2.冷水下锅大火焯水加姜3片料酒1勺捞出（火候：大火）\n3.萝卜去皮切滚刀块\n4.中火热油下姜葱八角桂皮香叶炒香（火候：中火）\n5.下牛腩大火翻炒至表面微焦\n6.加料酒1勺、生抽2勺、老抽1勺、冰糖翻炒上色\n7.加开水没过牛腩大火煮沸\n8.转小火炖1.5小时（火候：小火）\n9.下萝卜继续小火炖20分钟\n10.加盐1.5小勺，大火收汁3分钟出锅","ingredients":"牛腩500g\n白萝卜1根\n姜5片\n葱1根\n八角2颗\n桂皮1段\n香叶2片\n料酒2勺\n生抽2勺\n老抽1勺\n盐1.5小勺\n冰糖15g\n食用油2勺\n砂锅"},{"category":"seasonal","month":"11月","stepTime":"浸泡15分钟\n焯水5分钟\n炖煮40分钟\n收汁3分钟","name":"芋头烧排骨","type":"当季菜(秋季)","prepTime":"浸泡15分钟","steps":"1.排骨斩段冷水浸泡15分钟去血水\n2.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）\n3.芋头去皮切滚刀块（戴手套）\n4.中火热油下姜蒜爆香（火候：中火）\n5.下排骨大火翻炒至表面微焦\n6.加料酒半勺、生抽2勺、老抽半勺、白糖1小勺炒匀\n7.加开水没过排骨大火煮沸\n8.转小火炖20分钟（火候：小火）\n9.下芋头继续小火炖20分钟至芋头软糯\n10.加盐1小勺调味，大火收汁3分钟撒葱花","ingredients":"排骨300g\n小芋头300g\n姜4片\n蒜3瓣\n葱1根\n生抽2勺\n料酒1勺\n老抽半勺\n白糖1小勺\n盐1小勺\n食用油2勺\n砂锅"},{"category":"seasonal","month":"11月","stepTime":"腌肉10分钟\n焯香干1分钟\n滑炒2分钟\n翻炒3分钟","name":"芹菜炒香干","type":"当季菜(秋季)","prepTime":"腌制10分钟","steps":"1.肉丝加料酒半勺、生抽半勺、淀粉1勺、盐少许腌10分钟\n2.芹菜去叶切段，香干切条\n3.沸水大火焯香干1分钟捞出（火候：大火）\n4.中火热油下肉丝滑炒至变色盛出（火候：中火）\n5.大火爆香蒜末干辣椒（火候：大火）\n6.下芹菜大火翻炒1分钟\n7.下香干翻炒1分钟\n8.倒回肉丝，加生抽半勺、盐半小勺大火翻炒30秒出锅","ingredients":"芹菜200g\n香干150g\n猪肉丝100g\n蒜2瓣\n干辣椒2个\n生抽1勺\n料酒1勺\n盐1小勺\n淀粉1勺\n食用油2勺\n炒锅"},{"category":"seasonal","month":"11月","stepTime":"备料5分钟\n煮饭30分钟","name":"红薯焖饭","type":"当季菜(秋季)","prepTime":"无","steps":"1.红薯去皮切小丁\n2.腊肠切小丁\n3.大米淘洗干净加入电饭煲\n4.铺上红薯丁和腊肠丁\n5.加水比平时煮饭略少，加盐少许、油几滴\n6.按煮饭键煮熟即可\n7.出锅拌匀","ingredients":"红薯1个\n大米200g\n腊肠1根\n盐少许\n食用油少许\n电饭煲"},{"category":"seasonal","month":"11月","stepTime":"浸泡20分钟\n焯水5分钟\n炖煮55分钟","name":"萝卜排骨汤","type":"当季菜(秋季)","prepTime":"浸泡20分钟","steps":"1.排骨冷水浸泡20分钟去血水\n2.冷水下锅大火焯水加姜2片料酒半勺，撇浮沫捞出（火候：大火）\n3.白萝卜去皮切滚刀块\n4.砂锅大火烧开水（火候：大火）\n5.下排骨姜片大火煮沸转小火炖40分钟（火候：小火）\n6.下萝卜块继续小火炖15分钟至萝卜透明\n7.加盐1.5小勺、枸杞调味\n8.撒葱花出锅","ingredients":"排骨300g\n白萝卜1根\n姜4片\n葱1根\n料酒1勺\n盐1.5小勺\n枸杞少许\n砂锅"},{"category":"seasonal","month":"11月","stepTime":"焯藕片1分钟\n炒制2分钟","name":"糖醋莲藕","type":"当季菜(秋季)","prepTime":"无","steps":"1.莲藕去皮切薄片，泡水防氧化\n2.沸水大火焯藕片1分钟捞出过凉水（火候：大火）\n3.调糖醋汁：生抽1勺、醋1.5勺、白糖1.5勺、盐半小勺、淀粉1勺、水3勺搅匀\n4.大火热油下藕片大火翻炒1分钟（火候：大火）\n5.沿锅边淋入糖醋汁大火快速翻炒\n6.汤汁浓稠裹住藕片后撒葱花出锅","ingredients":"莲藕1节\n生抽1勺\n醋1.5勺\n白糖1.5勺\n盐半小勺\n淀粉1勺\n食用油2勺\n葱花少许\n炒锅"},{"category":"seasonal","month":"11月","stepTime":"煎豆腐5分钟\n煸肉5分钟\n炖煮10分钟","name":"白菜炖豆腐","type":"当季菜(秋季)","prepTime":"无","steps":"1.白菜手撕成块，豆腐切厚块，五花肉切薄片\n2.中火热油下豆腐块中火煎至两面金黄盛出（火候：中火）\n3.留底油下五花肉煸炒出油至微焦（火候：中火）\n4.下姜蒜爆香\n5.砂锅底铺白菜，放煎好的豆腐和五花肉\n6.加生抽2勺、盐1小勺和半碗水\n7.大火煮沸转小火炖10分钟（火候：小火）\n8.撒葱花出锅","ingredients":"大白菜半颗\n老豆腐1块\n五花肉100g\n姜3片\n蒜3瓣\n生抽2勺\n盐1小勺\n食用油2勺\n砂锅"},{"category":"seasonal","month":"11月","stepTime":"炸红薯6分钟\n熬糖浆5分钟\n挂糖1分钟","name":"拔丝红薯","type":"当季菜(秋季)","prepTime":"无","steps":"1.红薯去皮切滚刀块\n2.锅中倒油中火烧至六成热（筷子冒泡）\n3.下红薯块中火炸至金黄熟透（火候：中火），约5分钟\n4.捞出大火复炸30秒至外酥里嫩（火候：大火）\n5.另起锅加少量油和白糖，小火慢熬至糖融化（火候：小火）\n6.继续小火熬至糖浆冒大泡变琥珀色（火候：小火）\n7.关火迅速倒入红薯块快速翻拌均匀\n8.装盘趁热拉丝（盘子抹油防粘）\n9.配一碗凉水蘸食","ingredients":"红薯2个（约400g）\n白糖150g\n食用油适量\n炒锅"},{"category":"seasonal","month":"12月","stepTime":"浸泡30分钟\n焯水5分钟\n炖煮90分钟","name":"羊肉炖萝卜","type":"当季菜(冬季)","prepTime":"浸泡30分钟","steps":"1.羊肉切块冷水浸泡30分钟去血水\n2.冷水下锅大火焯水，加姜3片料酒1勺、花椒，撇浮沫捞出（火候：大火）\n3.萝卜去皮切滚刀块\n4.砂锅大火烧开水（火候：大火）\n5.下羊肉姜片八角大火煮沸\n6.转小火炖1小时（火候：小火）\n7.下萝卜继续小火炖30分钟\n8.加盐1.5小勺、白胡椒粉少许调味，撒葱花出锅","ingredients":"羊腿肉500g\n白萝卜1根\n姜5片\n葱1根\n八角2颗\n花椒少许\n料酒2勺\n盐1.5小勺\n白胡椒粉少许\n砂锅"},{"category":"seasonal","month":"12月","stepTime":"煎豆腐5分钟\n煸肉5分钟\n炖煮10分钟","name":"白菜豆腐煲","type":"当季菜(冬季)","prepTime":"无","steps":"1.白菜手撕成块\n2.豆腐切厚块\n3.五花肉切薄片\n4.中火热油下豆腐中火煎至两面金黄盛出（火候：中火）\n5.留底油下五花肉煸炒出油至微焦（火候：中火）\n6.下姜蒜爆香\n7.砂锅底铺白菜，放煎好的豆腐和五花肉\n8.加生抽2勺、蚝油1勺、盐1小勺和少量水\n9.大火煮沸转小火炖10分钟（火候：小火）\n10.撒葱花出锅","ingredients":"大白菜半颗\n老豆腐1块\n五花肉100g\n姜3片\n蒜3瓣\n生抽2勺\n蚝油1勺\n盐1小勺\n食用油2勺\n砂锅"},{"category":"seasonal","month":"12月","stepTime":"泡粉条30分钟\n煸肉5分钟\n炒酸菜3分钟\n炖煮10分钟","name":"酸菜炖粉条","type":"当季菜(冬季)","prepTime":"泡粉条30分钟","steps":"1.粉条温水泡软30分钟\n2.酸菜切丝洗两遍挤干水分\n3.五花肉切薄片\n4.中火热油下五花肉煸炒出油至微焦（火候：中火）\n5.下姜蒜干辣椒爆香\n6.下酸菜大火翻炒2分钟出酸味（火候：大火）\n7.加生抽2勺炒匀\n8.加开水没过食材大火煮沸\n9.下粉条转小火炖10分钟（火候：小火）\n10.加盐1小勺调味出锅","ingredients":"东北酸菜200g\n红薯粉条100g\n五花肉150g\n姜3片\n蒜3瓣\n干辣椒2个\n生抽2勺\n盐1小勺\n食用油2勺\n炒锅/砂锅"},{"category":"seasonal","month":"12月","stepTime":"腌萝卜15分钟\n拌制2分钟","name":"糖醋萝卜丝","type":"当季菜(冬季)","prepTime":"冷藏1小时（可选）","steps":"1.白萝卜去皮切细丝\n2.加盐1小勺抓匀腌15分钟出水\n3.挤干水分\n4.加白糖2勺、白醋2勺、香油1勺拌匀\n5.撒白芝麻即可\n6.冷藏腌制1小时更入味","ingredients":"白萝卜1根\n盐1小勺\n白糖2勺\n白醋2勺\n香油1勺\n白芝麻少许"},{"category":"seasonal","month":"12月","stepTime":"腌萝卜15分钟\n调糊3分钟\n煎制6分钟","name":"萝卜丝饼","type":"当季菜(冬季)","prepTime":"腌制15分钟","steps":"1.白萝卜去皮刨细丝，加盐半小勺腌15分钟出水，挤干水分\n2.萝卜丝加鸡蛋、面粉、葱花、盐半小勺、白胡椒粉半小勺搅匀成糊\n3.平底锅中火热油（火候：中火）\n4.舀一勺萝卜丝糊放入锅中摊平成圆形小饼\n5.中火煎至底面金黄翻面（火候：中火），每面约3分钟\n6.煎至两面金黄酥脆出锅","ingredients":"白萝卜1根\n面粉150g\n鸡蛋1个\n葱花适量\n盐1小勺\n白胡椒粉半小勺\n食用油3勺\n平底锅"},{"category":"seasonal","month":"12月","stepTime":"浸泡15分钟\n焯水5分钟\n焯笋3分钟\n炖煮50分钟","name":"冬笋炖鸡","type":"当季菜(冬季)","prepTime":"浸泡15分钟","steps":"1.鸡切块冷水浸泡15分钟去血水\n2.冷水下锅大火焯水加姜2片料酒半勺捞出（火候：大火）\n3.冬笋剥壳切滚刀块，沸水大火焯3分钟捞出（火候：大火）\n4.砂锅大火烧开水（火候：大火）\n5.下鸡块姜片大火煮沸\n6.转小火炖30分钟（火候：小火）\n7.下冬笋块继续小火炖20分钟\n8.加生抽1勺、盐1.5小勺调味\n9.撒葱花出锅","ingredients":"鸡半只\n冬笋200g\n姜4片\n葱1根\n料酒1勺\n生抽1勺\n盐1.5小勺\n砂锅"},{"category":"seasonal","month":"12月","stepTime":"泡粉条30分钟\n煸肉5分钟\n炒白菜3分钟\n炖煮15分钟\n收汁2分钟","name":"白菜猪肉炖粉条","type":"当季菜(冬季)","prepTime":"泡粉条30分钟","steps":"1.粉条温水泡软30分钟\n2.五花肉切厚片，白菜手撕成块\n3.中火热油下五花肉煸炒出油至微焦（火候：中火）\n4.下姜蒜八角爆香\n5.加生抽2勺、老抽1勺翻炒上色\n6.下白菜大火翻炒至软（火候：大火）\n7.加开水没过食材大火煮沸\n8.下粉条转小火炖15分钟（火候：小火）\n9.加盐1小勺调味，大火收汁2分钟出锅","ingredients":"大白菜半颗\n五花肉200g\n红薯粉条100g\n姜3片\n蒜3瓣\n八角1颗\n生抽2勺\n老抽1勺\n盐1小勺\n食用油2勺\n砂锅"},{"category":"seasonal","month":"12月","stepTime":"浸泡30分钟\n焯水5分钟\n炖煮80分钟","name":"山药炖羊肉","type":"当季菜(冬季)","prepTime":"浸泡30分钟","steps":"1.羊肉切块冷水浸泡30分钟去血水\n2.冷水下锅大火焯水加姜3片料酒1勺、花椒，撇浮沫捞出（火候：大火）\n3.山药去皮切滚刀块（戴手套）\n4.砂锅大火烧开水（火候：大火）\n5.下羊肉姜片八角大火煮沸\n6.转小火炖1小时（火候：小火）\n7.下山药继续小火炖20分钟至山药软糯\n8.加盐1.5小勺、白胡椒粉少许调味\n9.撒葱花出锅","ingredients":"羊腿肉400g\n山药200g\n姜5片\n葱1根\n八角1颗\n花椒少许\n料酒2勺\n盐1.5小勺\n白胡椒粉少许\n砂锅"}]};
+    data = migrateData(raw);
+  }
+  if (data.categories) {
+    for (var ck in data.categories) {
+      if (data.categories.hasOwnProperty(ck)) {
+        RECIPES.categories[ck] = data.categories[ck];
+      }
+    }
+  } else {
+    // Legacy format
+    RECIPES.categories.seasonal = data.seasonal || [];
+    RECIPES.categories.home = data.home || [];
+  }
+  syncCategoryDisplay();
+}
+loadData();
+
+// ===== Category Management =====
+function getCategories() {
+  var saved = lsGet('categories_v1');
+  var cats = saved ? JSON.parse(saved) : ['seasonal', 'home'];
+  if (cats.indexOf('seasonal') < 0) cats.unshift('seasonal');
+  if (cats.indexOf('home') < 0) cats.splice(1, 0, 'home');
+  // Sync with RECIPES.categories
+  for (var i = 0; i < cats.length; i++) {
+    if (!RECIPES.categories[cats[i]]) RECIPES.categories[cats[i]] = [];
+  }
+  return cats;
+}
+function saveCategories(cats) {
+  lsSet('categories_v1', JSON.stringify(cats));
+  pushToCloud();
+}
+function getRecipesByCategory(cat) {
+  return RECIPES.categories[cat] || [];
+}
+function addCategory(name) {
+  name = name.trim();
+  if (!name) { showToast('⚠️ 请输入分类名称', true); return false; }
+  var cats = getCategories();
+  if (cats.indexOf(name) >= 0) { showToast('⚠️ 分类已存在', true); return false; }
+  cats.push(name);
+  RECIPES.categories[name] = [];
+  saveCategories(cats);
+  saveRecipesToStorage();
+  showToast('✅ 已创建分类：' + name);
+  return true;
+}
+function deleteCategory(name) {
+  if (name === 'seasonal' || name === 'home') { showToast('⚠️ 不能删除默认分类', true); return; }
+  var recipes = getRecipesByCategory(name);
+  if (recipes.length > 0) {
+    if (!confirm('分类「' + name + '」中有 ' + recipes.length + ' 道菜品，删除后这些菜品将无法在分类中查看。\n\n确定删除吗？')) return;
+  }
+  var cats = getCategories();
+  var idx = cats.indexOf(name);
+  if (idx >= 0) { cats.splice(idx, 1); saveCategories(cats); }
+  delete RECIPES.categories[name];
+  saveRecipesToStorage();
+  renderCategoryCards();
+  showToast('🗑 已删除分类：' + name);
+}
+function renameCategory(oldName, newName) {
+  newName = newName.trim();
+  if (!newName) { showToast('⚠️ 请输入新名称', true); return false; }
+  if (oldName === 'seasonal' || oldName === 'home') { showToast('⚠️ 不能重命名默认分类', true); return false; }
+  var cats = getCategories();
+  if (cats.indexOf(newName) >= 0 && newName !== oldName) { showToast('⚠️ 分类名已存在', true); return false; }
+  var idx = cats.indexOf(oldName);
+  if (idx >= 0) { cats[idx] = newName; saveCategories(cats); }
+  RECIPES.categories[newName] = RECIPES.categories[oldName] || [];
+  // Update recipes in this category
+  for (var i = 0; i < RECIPES.categories[newName].length; i++) {
+    RECIPES.categories[newName][i].category = newName;
+  }
+  delete RECIPES.categories[oldName];
+  saveRecipesToStorage();
+  renderCategoryCards();
+  showToast('✅ 已重命名为：' + newName);
+  return true;
+}
+
+function openCategoryManagement() {
+  var cats = getCategories();
+  var html = '<h2>📂 管理分类</h2>';
+  html += '<ul class="cat-mgmt-list">';
+  for (var i = 0; i < cats.length; i++) {
+    var cat = cats[i];
+    var isFixed = cat === 'seasonal' || cat === 'home';
+    var count = (RECIPES.categories[cat] || []).length;
+    var icon = cat === 'seasonal' ? '🌿' : (cat === 'home' ? '🍖' : '📁');
+    html += '<li class="cat-mgmt-item' + (isFixed ? ' fixed-cat' : '') + '">';
+    html += '<span class="cat-mgmt-name">' + icon + ' ' + escapeHTML(cat) + '</span>';
+    html += '<span class="cat-mgmt-count">' + count + '道</span>';
+    if (!isFixed) {
+      html += '<div class="cat-mgmt-actions">';
+      html += '<button class="btn-rename" onclick="promptRenameCategory(\'' + escapeQuote(cat) + '\')">✏️ 重命名</button>';
+      html += '<button class="btn-delete-cat" onclick="deleteCategory(\'' + escapeQuote(cat) + '\');openCategoryManagement();">🗑 删除</button>';
+      html += '</div>';
+    }
+    html += '</li>';
+  }
+  html += '</ul>';
+  html += '<div class="cat-mgmt-add">';
+  html += '<input type="text" id="newCatName" placeholder="输入新分类名称...">';
+  html += '<button onclick="addCategoryFromInput()">➕ 新增</button>';
+  html += '</div>';
+  html += '<div class="form-actions" style="margin-top:12px;"><button class="btn-cancel" onclick="closeCatMgmt()">关闭</button></div>';
+  document.getElementById('catMgmtContent').innerHTML = html;
+  document.getElementById('catMgmtOverlay').classList.add('active');
+}
+function addCategoryFromInput() {
+  var input = document.getElementById('newCatName');
+  if (input && addCategory(input.value)) {
+    input.value = '';
+    openCategoryManagement();
+  }
+}
+function promptRenameCategory(oldName) {
+  var newName = prompt('将「' + oldName + '」重命名为：', oldName);
+  if (newName && newName !== oldName) {
+    renameCategory(oldName, newName);
+    openCategoryManagement();
+  }
+}
+function closeCatMgmt() {
+  document.getElementById('catMgmtOverlay').classList.remove('active');
+}
+
+// ===== Category Display Helpers =====
+function getCategoryDisplayName(cat) {
+  var icons = {seasonal: '🌿 ', home: '🍖 '};
+  return (icons[cat] || '📁 ') + (cat || '菜品库');
+}
+
+function syncCategoryDisplay() {
+  renderCategoryCards();
+}
+
+function renderCategoryCards() {
+  var cats = getCategories();
+  var grid = document.getElementById('categoryGrid');
+  if (!grid) return;
+  var html = '';
+  var icons = {seasonal: '🌿', home: '🍖'};
+  var colors = {seasonal: 'seasonal', home: 'home'};
+  for (var i = 0; i < cats.length; i++) {
+    var cat = cats[i];
+    var count = (RECIPES.categories[cat] || []).length;
+    var icon = icons[cat] || '📁';
+    var colorClass = colors[cat] || 'custom';
+    var isFixed = cat === 'seasonal' || cat === 'home';
+    html += '<div class="cat-card ' + colorClass + '" onclick="openRecipeList(\'' + escapeQuote(cat) + '\')">';
+    if (!isFixed) {
+      html += '<button class="cat-delete-btn" onclick="event.stopPropagation();deleteCategory(\'' + escapeQuote(cat) + '\')" title="删除分类">×</button>';
+    }
+    html += '<div class="cat-icon">' + icon + '</div>';
+    html += '<div class="cat-title">' + escapeHTML(cat) + '</div>';
+    html += '<div class="cat-count">' + count + ' 道菜品</div>';
+    html += '<div class="cat-hint">点击查看菜品</div>';
+    html += '<button class="cat-add-btn" onclick="event.stopPropagation();openRecipeForm(null,\'' + escapeQuote(cat) + '\')">➕ 添加菜品</button>';
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+}
+
+// ===== State =====
+var activeDay = null;
+var currentWeekOffset = 0;
+var currentCategory = '';
+var currentRecipes = [];
+var historyDate = null;
+var editingRecipeId = null;
+var currentImageData = '';
+var calendarYear = null;
+	var calendarMonth = null;
+
+// ===== Star/Favorite Management =====
+function getStarredRecipeIds() {
+  var saved = lsGet('starred_recipes_v1');
+  return saved ? JSON.parse(saved) : [];
+}
+function saveStarredRecipeIds(ids) {
+  lsSet('starred_recipes_v1', JSON.stringify(ids));
+  pushToCloud();
+}
+function isRecipeStarred(id) {
+  return getStarredRecipeIds().indexOf(id) >= 0;
+}
+function toggleStarRecipe(id) {
+  var ids = getStarredRecipeIds();
+  var idx = ids.indexOf(id);
+  var recipe = RECIPES.getById(id);
+  var recipeName = recipe ? recipe.name : '菜品';
+  if (idx >= 0) {
+    ids.splice(idx, 1);
+    showToast('⭐ 已取消星标：' + recipeName);
+  } else {
+    ids.push(id);
+    showToast('⭐ 已添加星标：' + recipeName);
+  }
+  saveStarredRecipeIds(ids);
+  if (currentCategory) {
+    currentRecipes = getRecipesByCategory(currentCategory);
+    renderRecipeList(currentRecipes);
+  }
+}
+var starFilterActive = false;
+function toggleStarFilter() {
+  starFilterActive = !starFilterActive;
+  var btn = document.getElementById('starFilterBtn');
+  if (btn) {
+    btn.textContent = starFilterActive ? '⭐ 全部' : '⭐ 星标';
+    if (starFilterActive) btn.classList.add('active'); else btn.classList.remove('active');
+  }
+  filterRecipes();
+}
+
+// ===== Date Helpers =====
+function dateKey(d) { return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function pad(n) { return n<10?'0'+n:''+n; }
+function formatDate(d) { return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'; }
+function getToday() { var d = new Date(); return dateKey(d); }
+function getMonday(d) {
+  d = new Date(d);
+  var day = d.getDay();
+  var diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0,0,0,0);
+  return d;
+}
+function getWeekDates() {
+  var now = new Date();
+  var monday = getMonday(now);
+  monday.setDate(monday.getDate() + currentWeekOffset * 7);
+  var dates = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday);
+    d.setDate(d.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+function parseKeyToDate(dk) {
+  var parts = dk.split('-');
+  return new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+}
+
+// ===== Menu Persistence =====
+function getMenu() { var saved = lsGet('menu_v2'); return saved ? JSON.parse(saved) : {}; }
+function saveMenu(menu) { lsSet('menu_v2', JSON.stringify(menu)); }
+function getDayRecipes(dk) { var menu = getMenu(); return menu[dk] || []; }
+
+function addRecipeToDay(dk, recipe) {
+  var menu = getMenu();
+  if (!menu[dk]) menu[dk] = [];
+  var exists = menu[dk].some(function(r) { return r.name === recipe.name; });
+  if (!exists) {
+    menu[dk].push({id:recipe.id||'', name:recipe.name, stepTime:recipe.stepTime, prepTime:recipe.prepTime, type:recipe.type, month:recipe.month, ingredients:recipe.ingredients, steps:recipe.steps, image:recipe.image||''});
+    saveMenu(menu);
+    renderWeek();
+    showToast('✅ 已添加「' + recipe.name + '」到 ' + formatDate(parseKeyToDate(dk)));
+    return true;
+  }
+  return false;
+}
+
+function removeRecipeFromDay(dk, recipeName) {
+  var menu = getMenu();
+  if (menu[dk]) {
+    menu[dk] = menu[dk].filter(function(r) { return r.name !== recipeName; });
+    saveMenu(menu);
+    renderWeek();
+  }
+}
+
+function clearAll() {
+  if (confirm('确定要清空本周所有食谱吗？此操作不可恢复。')) {
+    lsRemove('menu_v2');
+    renderWeek();
+    showToast('🗑 已清空本周食谱');
+  }
+}
+
+// ===== Render Week =====
+function renderWeek() {
+  if (!activeDay) activeDay = getToday();
+  var dates = getWeekDates();
+  var weekLabel = document.getElementById('weekLabel');
+  if (weekLabel) {
+    var monday = dates[0], sunday = dates[6];
+    weekLabel.textContent = formatDate(monday) + ' - ' + formatDate(sunday);
+  }
+  var weekStarBtn = document.getElementById('weekStarBtn');
+  if (weekStarBtn) weekStarBtn.style.display = 'none';
+  var dayNames = ['周一','周二','周三','周四','周五','周六','周日'];
+  var todayKey = getToday();
+  var grid = document.getElementById('weekGrid');
+  var html = '';
+  for (var i = 0; i < 7; i++) {
+    var d = dates[i], dk = dateKey(d);
+    var isToday = dk === todayKey;
+    var isActive = dk === activeDay;
+    var recipes = getDayRecipes(dk);
+    html += '<div class="day-card' + (isToday ? ' today' : '') + (isActive ? ' active' : '') + '" onclick="setActiveDay(\'' + dk + '\')">';
+    if (isToday && isActive) {
+      html += '<div class="day-badge today-badge">今天·选中</div>';
+    } else if (isToday) {
+      html += '<div class="day-badge today-badge">今天</div>';
+    } else if (isActive) {
+      html += '<div class="day-badge active-badge">已选中</div>';
+    }
+    html += '<div class="day-name">' + dayNames[i] + '</div>';
+    html += '<div class="day-date">' + formatDate(d) + '</div>';
+    if (recipes.length === 0) {
+      html += '<div class="day-empty"><span class="empty-icon">🍽️</span>暂无菜品</div>';
+    } else {
+      for (var j = 0; j < recipes.length; j++) {
+        var r = recipes[j];
+        html += '<div class="day-recipe" onclick="event.stopPropagation();showDayRecipeDetail(\'' + dk + '\',' + j + ')">';
+        html += '<span class="recipe-name">' + escapeHTML(r.name) + '</span><br>';
+        html += '<span class="recipe-time">⏱ ' + escapeHTML(r.stepTime || '') + '</span>';
+        html += '<button class="remove-btn" onclick="event.stopPropagation();removeRecipeFromDay(\'' + dk + '\',\'' + escapeQuote(r.name) + '\')">×</button>';
+        html += '</div>';
+      }
+    }
+    html += '</div>';
+  }
+  grid.innerHTML = html;
+  updateActiveDayInfo();
+}
+
+function escapeHTML(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escapeQuote(str) {
+  return str.replace(/'/g,"\\'").replace(/"/g,'\\"');
+}
+
+// ===== Active Day Management =====
+function setActiveDay(dk) { activeDay = dk; renderWeek(); showToast('📌 已选中 ' + formatDate(parseKeyToDate(dk)) + '，去挑选菜品将添加到这一天'); }
+function updateActiveDayInfo() {
+  var dk = activeDay || getToday();
+  var d = parseKeyToDate(dk);
+  var text = formatDate(d) + '（' + ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()] + '）';
+  var el = document.getElementById('activeDayText'); if (el) el.textContent = text;
+  var el2 = document.getElementById('activeDayInfo2'); if (el2) el2.innerHTML = '📌 将为 <strong>' + text + '</strong> 挑选菜品';
+  var el3 = document.getElementById('activeDayInfo3'); if (el3) el3.innerHTML = '📌 将为 <strong>' + text + '</strong> 挑选菜品';
+}
+
+// ===== Tab Navigation =====
+function switchTab(screenId, tabEl) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(screenId).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+  if (tabEl) tabEl.classList.add('active');
+  var titles = {screen1:'今日食谱', screen2:'菜品库', screen3: getCategoryDisplayName(currentCategory), screen4:'历史查询'};
+  document.getElementById('headerTitle').textContent = titles[screenId] || '今日食谱';
+  if (screenId === 'screen1') { renderWeek(); }
+  if (screenId === 'screen2') { updateActiveDayInfo(); renderCategoryCards(); }
+  if (screenId === 'screen3') { updateActiveDayInfo(); }
+  if (screenId === 'screen4') { if (!historyDate) historyDate = new Date(); renderHistory(); }
+}
+
+// ===== Screen Navigation (legacy, for internal use) =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen1') { document.getElementById('headerTitle').textContent = '今日食谱'; renderWeek(); }
+  else if (id === 'screen2') { document.getElementById('headerTitle').textContent = '菜品库'; updateActiveDayInfo(); }
+  else if (id === 'screen3') { document.getElementById('headerTitle').textContent = getCategoryDisplayName(currentCategory); updateActiveDayInfo(); }
+}
+
+function goPick() {
+  if (!activeDay) activeDay = getToday();
+  updateActiveDayInfo();
+  switchTab('screen2', document.querySelector('.tab-item[data-tab="screen2"]'));
+}
+
+// ===== Recipe List =====
+function openRecipeList(category) {
+  currentCategory = category;
+  currentRecipes = getRecipesByCategory(category);
+  document.getElementById('searchBox').value = '';
+  renderRecipeList(currentRecipes);
+  switchTab('screen3', null);
+}
+
+function syncRecipeCounts() {
+  renderCategoryCards();
+}
+
+function renderRecipeList(list) {
+  var fc = document.getElementById('filterCount'); if (fc) fc.textContent = '共 ' + list.length + ' 道';
+  // Sort: starred first, then by category-specific rules
+  var monthOrder = { '全年':0, '1月':1, '2月':2, '3月':3, '4月':4, '5月':5, '6月':6, '7月':7, '8月':8, '9月':9, '10月':10, '11月':11, '12月':12 };
+  var sorted = list.slice().sort(function(a, b) {
+    var aStar = isRecipeStarred(a.id) ? 1 : 0;
+    var bStar = isRecipeStarred(b.id) ? 1 : 0;
+    if (aStar !== bStar) return bStar - aStar;
+    // Seasonal: sort by month order
+    if (currentCategory === 'seasonal') {
+      var aMonth = monthOrder[a.month] !== undefined ? monthOrder[a.month] : 99;
+      var bMonth = monthOrder[b.month] !== undefined ? monthOrder[b.month] : 99;
+      return aMonth - bMonth;
+    }
+    // Home-cooked: newest first (reverse chronological)
+    if (currentCategory === 'home') {
+      return (parseInt(b.createdAt) || 0) - (parseInt(a.createdAt) || 0);
+    }
+    return 0;
+  });
+  var html = '';
+  for (var i = 0; i < sorted.length; i++) {
+    var r = sorted[i];
+    var starred = isRecipeStarred(r.id);
+    var ingLines = (r.ingredients || '').split('\n');
+    var ingPreview = ingLines.slice(0, 3).join('\n');
+    if (ingLines.length > 3) ingPreview += '\n...（共' + ingLines.length + '项）';
+    html += '<div class="recipe-card' + (currentCategory === 'home' ? ' home-card' : '') + (starred ? ' starred' : '') + '" style="position:relative;">';
+    html += '<button class="r-star-btn" onclick="event.stopPropagation();toggleStarRecipe(\'' + r.id + '\')" title="' + (starred ? '取消星标' : '添加星标') + '">' + (starred ? '⭐' : '☆') + '</button>';
+    html += '<div class="r-name">' + escapeHTML(r.name) + '</div>';
+    html += '<div class="r-meta">';
+    if (r.month) html += '<span>📅 ' + escapeHTML(r.month) + '</span>';
+    html += '<span>🏷 ' + escapeHTML(r.type || '') + '</span>';
+    if (r.isCustom) html += '<span style="background:#e8f5e9;color:#27ae60;">✏️ 自定义</span>';
+    html += '</div>';
+    html += '<div class="r-prep">⏱ 准备时间：' + escapeHTML(r.stepTime || '暂无') + '</div>';
+    html += '<div class="r-ingredients">📋 ' + ingPreview.replace(/\n/g, '<br>') + '</div>';
+    html += '<div class="r-actions">';
+    html += '<button class="btn-select" onclick="pickRecipeById(\'' + r.id + '\')">✅ 挑选</button>';
+    html += '<button class="btn-detail" onclick="showDetailById(\'' + r.id + '\')">📄 详情</button>';
+    html += '<button class="btn-edit-card" onclick="openRecipeFormById(\'' + r.id + '\')">✏️ 编辑</button>';
+    html += '</div></div>';
+  }
+  var rl = document.getElementById('recipeList'); if (rl) rl.innerHTML = html;
+}
+
+function filterRecipes() {
+  var q = document.getElementById('searchBox').value.toLowerCase();
+  var filtered = currentRecipes.filter(function(r) { return r.name.toLowerCase().indexOf(q) >= 0; });
+  if (starFilterActive) {
+    filtered = filtered.filter(function(r) { return isRecipeStarred(r.id); });
+  }
+  renderRecipeList(filtered);
+}
+
+function getCurrentFilteredRecipes() {
+  var q = document.getElementById('searchBox').value.toLowerCase();
+  return currentRecipes.filter(function(r) { return r.name.toLowerCase().indexOf(q) >= 0; });
+}
+
+// ===== Pick Recipe =====
+function pickRecipeById(id) {
+  var recipe = RECIPES.getById(id);
+  if (!recipe) return;
+  var dk = activeDay || getToday();
+  var added = addRecipeToDay(dk, recipe);
+  if (added) { switchTab('screen1', document.querySelector('.tab-item[data-tab=screen1]')); }
+  else { showToast('⚠️ 该菜品已在 ' + formatDate(parseKeyToDate(dk)) + ' 中', true); }
+}
+
+// ===== Detail Modal =====
+function showDetailById(id) {
+  var recipe = RECIPES.getById(id);
+  if (!recipe) return;
+  showDetailForRecipe(recipe);
+}
+
+function showDayRecipeDetail(dk, index) {
+  var recipes = getDayRecipes(dk);
+  var recipe = recipes[index];
+  if (!recipe) return;
+  showDetailForRecipe(recipe);
+}
+
+function showDetailForRecipe(recipe) {
+  var html = '<h2>📄 ' + escapeHTML(recipe.name) + '</h2>';
+  if (recipe.image) {
+    html += '<div class="detail-section"><img src="' + recipe.image + '" alt="' + escapeHTML(recipe.name) + '"></div>';
+  }
+  html += '<div class="detail-section"><h3>📋 需要购买的材料（含锅具）</h3><pre>' + escapeHTML(recipe.ingredients || '无') + '</pre></div>';
+  html += '<div class="detail-section"><h3>⏱ 准备时间（每步时间）</h3><pre>' + escapeHTML(recipe.stepTime || '无') + '</pre></div>';
+  html += '<div class="detail-section"><h3>🕐 提前预留时间</h3><pre>' + escapeHTML(recipe.prepTime || '无') + '</pre></div>';
+  html += '<div class="detail-section"><h3>👨‍🍳 制作流程</h3><pre>' + escapeHTML(recipe.steps || '无') + '</pre></div>';
+  if (recipe.type || recipe.month) {
+    html += '<div class="detail-section"><h3>🏷 分类</h3><pre>' + escapeHTML(recipe.type || '') + (recipe.month ? '  |  ' + escapeHTML(recipe.month) : '') + '</pre></div>';
+  }
+  html += '<button class="close-btn" onclick="closeModal()">关闭</button>';
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+// ===== Form Modal (Add/Edit) =====
+function openRecipeFormById(id) {
+  var recipe = RECIPES.getById(id);
+  if (recipe) openRecipeForm(recipe, null);
+}
+
+function openRecipeForm(recipeData, presetCategory) {
+  editingRecipeId = recipeData ? recipeData.id : null;
+  currentImageData = recipeData ? (recipeData.image || '') : '';
+  var isEdit = !!recipeData;
+  var cat = recipeData ? recipeData.category : (presetCategory || 'seasonal');
+  var title = isEdit ? '✏️ 编辑菜品' : '➕ 新增菜品';
+
+  var html = '<h2>' + title + '</h2>';
+  html += '<div class="form-group"><label>菜品名称 *</label><input type="text" id="formName" value="' + escapeHTML(recipeData ? recipeData.name : '') + '" placeholder="请输入菜品名称"></div>';
+  html += '<div class="form-group"><label>类别 *</label><select id="formCategory" onchange="onFormCategoryChange()">';
+  var cats = getCategories();
+  for (var ci = 0; ci < cats.length; ci++) {
+    var c = cats[ci];
+    html += '<option value="' + c + '"' + (cat === c ? ' selected' : '') + '>' + escapeHTML(c) + '</option>';
+  }
+  html += '</select></div>';
+  html += '<div class="form-group" id="formMonthGroup" style="' + (cat!=='seasonal'?'display:none':'') + '"><label>适合月份</label><select id="formMonth">';
+  var months = ['全年','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  var curMonth = recipeData ? (recipeData.month || '1月') : '1月';
+  for (var m = 0; m < months.length; m++) {
+    html += '<option value="' + months[m] + '"' + (curMonth === months[m] ? ' selected' : '') + '>' + months[m] + '</option>';
+  }
+  html += '</select></div>';
+  html += '<div class="form-group"><label>菜品类型</label><input type="text" id="formType" value="' + escapeHTML(recipeData ? recipeData.type : (cat==='seasonal'?'当季菜':'家常菜')) + '" placeholder="如：家常菜、汤品、凉菜"></div>';
+  html += '<div class="form-group"><label>准备时间（每步时间）</label><input type="text" id="formStepTime" value="' + escapeHTML(recipeData ? recipeData.stepTime : '') + '" placeholder="如：腌肉15分钟、炒制5分钟"></div>';
+  html += '<div class="form-group"><label>提前预留时间</label><input type="text" id="formPrepTime" value="' + escapeHTML(recipeData ? recipeData.prepTime : '') + '" placeholder="如：腌制30分钟"></div>';
+  html += '<div class="form-group"><label>需要购买的材料（含锅具）</label><textarea id="formIngredients" rows="4" placeholder="每行一项材料">' + escapeHTML(recipeData ? recipeData.ingredients : '') + '</textarea></div>';
+  html += '<div class="form-group"><label>制作流程</label><textarea id="formSteps" rows="6" placeholder="每行一个步骤">' + escapeHTML(recipeData ? recipeData.steps : '') + '</textarea></div>';
+  html += '<div class="form-group"><label>菜品图片</label><div class="image-upload-area"><input type="file" id="imageFileInput" accept="image/*" onchange="handleImageUpload(this)"><div class="image-preview" id="imagePreview">';
+  if (currentImageData) {
+    html += '<img src="' + currentImageData + '" alt="预览">';
+  } else {
+    html += '<span class="upload-placeholder">📷 点击上传图片（可选）</span>';
+  }
+  html += '</div></div><button class="btn-remove-image" id="btnRemoveImage" style="' + (currentImageData ? '' : 'display:none') + ';" onclick="removeImage()">移除图片</button></div>';
+  html += '<div class="form-actions">';
+  if (isEdit) html += '<button class="btn-delete" onclick="deleteRecipe()">🗑 删除菜品</button>';
+  html += '<button class="btn-cancel" onclick="closeFormModal()">取消</button>';
+  html += '<button class="btn-save" onclick="saveRecipeForm()">💾 保存</button>';
+  html += '</div>';
+
+  document.getElementById('formModalContent').innerHTML = html;
+  document.getElementById('formModalOverlay').classList.add('active');
+}
+
+function onFormCategoryChange() {
+  var cat = document.getElementById('formCategory').value;
+  var mg = document.getElementById('formMonthGroup');
+  if (mg) mg.style.display = cat === 'seasonal' ? '' : 'none';
+  var ft = document.getElementById('formType');
+  if (ft && !ft.value) ft.value = cat === 'seasonal' ? '当季菜' : '家常菜';
+}
+
+function closeFormModal() {
+  document.getElementById('formModalOverlay').classList.remove('active');
+  editingRecipeId = null;
+  currentImageData = '';
+}
+
+function saveRecipeForm() {
+  var name = document.getElementById('formName').value.trim();
+  if (!name) { showToast('⚠️ 请输入菜品名称', true); return; }
+  var category = document.getElementById('formCategory').value;
+  var month = document.getElementById('formMonth').value;
+  var type = document.getElementById('formType').value.trim();
+  var stepTime = document.getElementById('formStepTime').value.trim();
+  var prepTime = document.getElementById('formPrepTime').value.trim();
+  var ingredients = document.getElementById('formIngredients').value.trim();
+  var steps = document.getElementById('formSteps').value.trim();
+
+  var recipe = {
+    name: name, category: category, month: month, type: type,
+    stepTime: stepTime, prepTime: prepTime, ingredients: ingredients, steps: steps,
+    image: currentImageData
+  };
+
+  if (editingRecipeId) {
+    updateExistingRecipe(editingRecipeId, recipe);
+    showToast('✅ 菜品已更新');
+  } else {
+    addNewRecipe(recipe);
+    showToast('✅ 新菜品已添加');
+  }
+  closeFormModal();
+}
+
+function addNewRecipe(recipe) {
+  recipe.id = generateRecipeId();
+  recipe.isCustom = true;
+  recipe.createdAt = Date.now().toString();
+  recipe.image = recipe.image || '';
+  if (!RECIPES.categories[recipe.category]) RECIPES.categories[recipe.category] = [];
+  RECIPES.categories[recipe.category].push(recipe);
+  saveRecipesToStorage();
+  syncRecipeCounts();
+  if (currentCategory === recipe.category) {
+    currentRecipes = getRecipesByCategory(currentCategory);
+    renderRecipeList(currentRecipes);
+  }
+}
+
+function updateExistingRecipe(id, data) {
+  var recipe = RECIPES.getById(id);
+  if (!recipe) return;
+  var oldCategory = recipe.category;
+  for (var key in data) { if (data.hasOwnProperty(key)) recipe[key] = data[key]; }
+  if (oldCategory !== recipe.category) {
+    RECIPES.removeById(id);
+    if (!RECIPES.categories[recipe.category]) RECIPES.categories[recipe.category] = [];
+    RECIPES.categories[recipe.category].push(recipe);
+  }
+  saveRecipesToStorage();
+  syncRecipeCounts();
+  if (currentCategory) {
+    currentRecipes = getRecipesByCategory(currentCategory);
+    renderRecipeList(currentRecipes);
+  }
+}
+
+function deleteRecipe() {
+  if (!editingRecipeId) return;
+  if (!confirm('确定要删除这道菜品吗？\n\n删除后不可恢复。如果该菜品已添加到某日食谱中，仍会保留在当日菜单中。')) return;
+  var recipe = RECIPES.getById(editingRecipeId);
+  if (!recipe) return;
+  RECIPES.removeById(editingRecipeId);
+  saveRecipesToStorage();
+  syncRecipeCounts();
+  closeFormModal();
+  if (currentCategory === recipe.category) {
+    currentRecipes = getRecipesByCategory(currentCategory);
+    renderRecipeList(currentRecipes);
+  }
+  showToast('🗑 菜品已删除');
+}
+
+// ===== Image Upload =====
+function handleImageUpload(fileInput) {
+  var file = fileInput.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { showToast('⚠️ 图片不能超过3MB，请压缩后重试', true); fileInput.value = ''; return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    currentImageData = e.target.result;
+    var preview = document.getElementById('imagePreview');
+    if (preview) preview.innerHTML = '<img src="' + currentImageData + '" alt="预览">';
+    var btn = document.getElementById('btnRemoveImage');
+    if (btn) btn.style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  currentImageData = '';
+  var preview = document.getElementById('imagePreview');
+  if (preview) preview.innerHTML = '<span class="upload-placeholder">📷 点击上传图片（可选）</span>';
+  var btn = document.getElementById('btnRemoveImage');
+  if (btn) btn.style.display = 'none';
+  var fileInput = document.getElementById('imageFileInput');
+  if (fileInput) fileInput.value = '';
+}
+
+// ===== History =====
+function renderHistory() {
+  var d = historyDate || new Date();
+  var dk = dateKey(d);
+  var datePicker = document.getElementById('historyDatePicker');
+  if (datePicker) datePicker.value = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  var dayNames = ['周日','周一','周二','周三','周四','周五','周六'];
+  var info = document.getElementById('historyDateInfo');
+  if (info) info.innerHTML = formatDate(d) + ' <strong>' + dayNames[d.getDay()] + '</strong>';
+  var recipes = getDayRecipes(dk);
+  var list = document.getElementById('historyRecipeList');
+  if (!list) return;
+  if (recipes.length === 0) {
+    list.innerHTML = '<div class="history-empty"><span class="empty-icon">🍽️</span>该日期暂无菜品记录<br><span style="font-size:12px;">去「今日食谱」中添加菜品吧</span></div>';
+  } else {
+    var html = '';
+    for (var i = 0; i < recipes.length; i++) {
+      var r = recipes[i];
+      html += '<div class="history-recipe-item" onclick="showDetailForRecipe({name:\'' + escapeQuote(r.name) + '\',ingredients:\'' + escapeQuote(r.ingredients||'') + '\',steps:\'' + escapeQuote(r.steps||'') + '\',stepTime:\'' + escapeQuote(r.stepTime||'') + '\',prepTime:\'' + escapeQuote(r.prepTime||'') + '\',type:\'' + escapeQuote(r.type||'') + '\',month:\'' + escapeQuote(r.month||'') + '\',image:\'' + escapeQuote(r.image||'') + '\'})">';
+      html += '<span class="h-name">' + escapeHTML(r.name) + '</span>';
+      html += '<span class="h-time">⏱ ' + escapeHTML(r.stepTime || '') + '</span>';
+      html += '<span class="h-arrow">›</span>';
+      html += '</div>';
+    }
+    list.innerHTML = html;
+  }
+}
+
+function prevHistoryDay() {
+  if (!historyDate) historyDate = new Date();
+  historyDate.setDate(historyDate.getDate() - 1);
+  renderHistory();
+}
+function nextHistoryDay() {
+  if (!historyDate) historyDate = new Date();
+  historyDate.setDate(historyDate.getDate() + 1);
+  renderHistory();
+}
+function goHistoryToday() { historyDate = new Date(); renderHistory(); }
+function onHistoryDateChange() {
+  var picker = document.getElementById('historyDatePicker');
+  if (picker && picker.value) {
+    var parts = picker.value.split('-');
+    historyDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    renderHistory();
+  }
+}
+
+// ===== Week Navigation =====
+function prevWeek() { currentWeekOffset--; activeDay = null; renderWeek(); }
+function nextWeek() { currentWeekOffset++; activeDay = null; renderWeek(); }
+function goCurrentWeek() { currentWeekOffset = 0; activeDay = null; renderWeek(); }
+
+// ===== Calendar =====
+function openCalendar() {
+  var dates = getWeekDates();
+  calendarYear = dates[0].getFullYear();
+  calendarMonth = dates[0].getMonth();
+  renderCalendar();
+  document.getElementById('calendarOverlay').classList.add('active');
+}
+function closeCalendar() {
+  document.getElementById('calendarOverlay').classList.remove('active');
+}
+function renderCalendar() {
+  var y = calendarYear, m = calendarMonth;
+  var firstDay = new Date(y, m, 1);
+  var lastDay = new Date(y, m + 1, 0);
+  var startDow = firstDay.getDay();
+  var daysInMonth = lastDay.getDate();
+  var today = new Date();
+  var todayKey = dateKey(today);
+  var weekDates = getWeekDates();
+  var weekKeys = weekDates.map(function(d) { return dateKey(d); });
+  var starredDates = [];
+
+  var html = '<h2>📅 选择日期</h2>';
+	html += '<div class="calendar-nav">';
+	html += '<button onclick="calendarPrevMonth()">◀</button>';
+	html += '<span class="cal-month-label">' + y + '年 ' + (m + 1) + '月</span>';
+	html += '<button onclick="calendarNextMonth()">▶</button>';
+	html += '</div>';
+	html += '<div class="calendar-grid">';
+  var headers = ['日','一','二','三','四','五','六'];
+  for (var h = 0; h < 7; h++) html += '<div class="cal-day-header">' + headers[h] + '</div>';
+  // Previous month fill
+  if (startDow > 0) {
+    var prevLast = new Date(y, m, 0).getDate();
+    for (var p = startDow - 1; p >= 0; p--) {
+      html += '<div class="cal-day other-month">' + (prevLast - p) + '</div>';
+    }
+  }
+  // Current month days
+  for (var d = 1; d <= daysInMonth; d++) {
+    var date = new Date(y, m, d);
+    var dk = dateKey(date);
+    var isToday = dk === todayKey;
+    var inWeek = weekKeys.indexOf(dk) >= 0;
+    var cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (inWeek) cls += ' in-week';
+    html += '<div class="' + cls + '" onclick="selectCalendarDay(' + d + ')">';
+    html += d;
+    html += '</div>';
+  }
+  // Next month fill
+  var remaining = 7 - ((startDow + daysInMonth) % 7);
+  if (remaining < 7) {
+    for (var n = 1; n <= remaining; n++) {
+      html += '<div class="cal-day other-month">' + n + '</div>';
+    }
+  }
+  html += '</div>';
+  html += '<div class="calendar-actions">';
+	html += '<button onclick="goCurrentWeek();closeCalendar();">📅 本周</button>';
+	html += '<button class="btn-cancel" onclick="closeCalendar()">关闭</button>';
+	html += '</div>';
+  document.getElementById('calendarPopup').innerHTML = html;
+}
+function calendarPrevMonth() {
+  calendarMonth--;
+  if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+  renderCalendar();
+}
+function calendarNextMonth() {
+  calendarMonth++;
+  if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+  renderCalendar();
+}
+function selectCalendarDay(day) {
+  var targetDate = new Date(calendarYear, calendarMonth, day);
+  var targetMonday = getMonday(targetDate);
+  var currentMonday = getMonday(new Date());
+  currentWeekOffset = Math.round((targetMonday - currentMonday) / (7 * 86400000));
+  activeDay = null;
+  closeCalendar();
+  renderWeek();
+  showToast('📅 已跳转到 ' + formatDate(targetDate) + ' 所在周');
+}
+
+// ===== Toast =====
+function showToast(msg, isWarning) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show' + (isWarning ? ' warning' : '');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(function() { toast.classList.remove('show'); }, 2500);
+}
+
+// ===== Modal Close =====
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('formModalOverlay').addEventListener('click', function(e) { if (e.target === this) closeFormModal(); });
+document.getElementById('calendarOverlay').addEventListener('click', function(e) { if (e.target === this) closeCalendar(); });
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeModal(); closeFormModal(); closeCalendar(); }
+});
+
+// ===== Init =====
+activeDay = getToday();
+renderWeek();
+
+// ===== App Title Customization =====
+function getCurrentAppTitle() {
+  var saved = lsGet('app_title');
+  if (saved) return saved;
+  var h1 = document.querySelector('.header h1');
+  if (h1) {
+    var text = h1.textContent.replace(/^[🍳🥘🍲🍜🥟🍝🥗🍱🥩🍗🍖🌮🍕🍔🥪🥙🧆🥘]\s*/, '');
+    return text.trim() || '喉结儿菜谱';
+  }
+  return '喉结儿菜谱';
+}
+
+function initAppTitle() {
+  var savedTitle = lsGet('app_title');
+  var h1 = document.querySelector('.header h1');
+  if (savedTitle && h1) {
+    h1.textContent = '🍳 ' + savedTitle;
+    document.title = savedTitle;
+  }
+  if (h1) {
+    h1.title = '点击修改菜谱名称';
+    h1.addEventListener('click', function() {
+      var currentTitle = getCurrentAppTitle();
+      var newTitle = prompt('请输入新的菜谱名称：', currentTitle);
+      if (newTitle !== null && newTitle.trim()) {
+        newTitle = newTitle.trim();
+        lsSet('app_title', newTitle);
+        h1.textContent = '🍳 ' + newTitle;
+        document.title = newTitle;
+        pushToCloud();
+        showToast('✅ 菜谱名称已更新为：' + newTitle);
+      }
+    });
+  }
+}
+
+initAppTitle();
+
+// 自动初始化云同步
+function autoInitCloudSync() {
+  initCloud();
+  // 如果已启用过，直接重连
+  if (lsGet('cloud_sync_enabled') === '1' && GIST_CONFIG.token) {
+    enableCloudSync();
+    return;
+  }
+  // 如果没有 token，自动弹出输入框
+  if (!GIST_CONFIG.token) {
+    setTimeout(function() {
+      var token = prompt('请输入 GitHub Token（仅需 gist 权限）：\n\n输入后自动启用云同步，多人共享菜谱');
+      if (!token || !token.trim()) {
+        showToast('📦 将使用本地存储模式', false);
+        return;
+      }
+      GIST_CONFIG.token = token.trim();
+      lsSet('github_token', GIST_CONFIG.token);
+      lsSet('cloud_sync_enabled', '1');
+      enableCloudSync();
+    }, 800);
+  }
+}
+
+autoInitCloudSync();
+</script>
+</body>
+</html>
