@@ -424,7 +424,6 @@ function enableCloudSync() {
   showToast('☁️ 正在连接 GitHub...');
   
   if (GIST_CONFIG.gistId) {
-    // 已有 Gist，从云端拉取数据
     loadFromCloud(function(success) {
       if (success) {
         showToast('☁️ 云同步已启用，数据每3秒自动同步');
@@ -437,16 +436,41 @@ function enableCloudSync() {
       }
     });
   } else {
-    // 首次使用，创建 Gist 并推送本地数据
-    createCloudGist(function(success) {
-      if (success) {
-        showToast('☁️ 云同步已启用，数据每3秒自动同步');
-        startCloudPolling();
+    // 没有 gistId，先查找已有的 Gist
+    findExistingGist(function(foundId) {
+      if (foundId) {
+        GIST_CONFIG.gistId = foundId;
+        lsSet('gist_id', foundId);
+        loadFromCloud(function(success) {
+          if (success) {
+            showToast('☁️ 云同步已启用，数据每3秒自动同步');
+            startCloudPolling();
+          } else {
+            createCloudGist(function(success) {
+              if (success) {
+                showToast('☁️ 云同步已启用，数据每3秒自动同步');
+                startCloudPolling();
+              } else {
+                showToast('⚠️ 创建云端存储失败，请检查 Token 和网络', true);
+                cloudSyncEnabled = false;
+                lsRemove('cloud_sync_enabled');
+                updateSyncButtonUI();
+              }
+            });
+          }
+        });
       } else {
-        showToast('⚠️ 创建云端存储失败，请检查 Token 和网络', true);
-        cloudSyncEnabled = false;
-        lsRemove('cloud_sync_enabled');
-        updateSyncButtonUI();
+        createCloudGist(function(success) {
+          if (success) {
+            showToast('☁️ 云同步已启用，数据每3秒自动同步');
+            startCloudPolling();
+          } else {
+            showToast('⚠️ 创建云端存储失败，请检查 Token 和网络', true);
+            cloudSyncEnabled = false;
+            lsRemove('cloud_sync_enabled');
+            updateSyncButtonUI();
+          }
+        });
       }
     });
   }
@@ -523,6 +547,22 @@ function createCloudGist(callback) {
   }).catch(function(err) {
     console.error('创建 Gist 失败:', err);
     if (callback) callback(false);
+  });
+}
+
+function findExistingGist(callback) {
+  githubApi('GET', '/gists').then(function(gists) {
+    for (var i = 0; i < gists.length; i++) {
+      var gist = gists[i];
+      if (gist.files && gist.files[GIST_FILENAME]) {
+        if (callback) callback(gist.id);
+        return;
+      }
+    }
+    if (callback) callback(null);
+  }).catch(function(err) {
+    console.error('查找 Gist 失败:', err);
+    if (callback) callback(null);
   });
 }
 
